@@ -11,7 +11,8 @@ class PinayCum : MainAPI() {
     override var lang = "tl"
     override val hasMainPage = true
     override val hasQuickSearch = true
-    override val hasSearch = true
+
+    // Removed hasSearch (it doesn't exist in newer API)
 
     override val mainPage = mainPageOf(
         "$mainUrl/" to "Latest Videos",
@@ -24,10 +25,11 @@ class PinayCum : MainAPI() {
         return newHomePageResponse(request.name, items, hasNext = true)
     }
 
-    override suspend fun search(query: String, page: Int): List<SearchResponse> {
+    override suspend fun search(query: String, page: Int): SearchResponseList? {
         val url = if (page <= 1) "$mainUrl/?s=$query" else "$mainUrl/?s=$query&page=$page"
         val document = app.get(url).document
-        return document.select("a[href*='watch.php?id=']").mapNotNull { it.toSearchResult() }
+        val results = document.select("a[href*='watch.php?id=']").mapNotNull { it.toSearchResult() }
+        return newSearchResponseList(results, hasNext = true)
     }
 
     private fun Element.toSearchResult(): SearchResponse? {
@@ -84,7 +86,7 @@ class PinayCum : MainAPI() {
             )
         }
 
-        // Any <video> sources
+        // Video sources
         document.select("video[src], source[src]").forEach { el ->
             val src = fixUrlNull(el.attr("src"))
             if (src != null) {
