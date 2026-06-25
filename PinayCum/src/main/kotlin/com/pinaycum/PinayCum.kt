@@ -31,14 +31,18 @@ class PinayCum : MainAPI() {
     }
 
     private fun Element.toSearchResult(): SearchResponse? {
-        val titleElement = selectFirst("h2, strong, .title, a") ?: return null
-        val title = titleElement.text().trim()
-        val href = fixUrlNull(titleElement.attr("href")) ?: return null
+        val title = selectFirst("h2, strong, .title, a")?.text()?.trim() 
+            ?: ownText().trim().takeIf { it.isNotEmpty() } 
+            ?: return null
 
+        val href = fixUrlNull(attr("href")) ?: return null
+
+        // Improved poster extraction (handles lazy loading)
         val poster = fixUrlNull(
             selectFirst("img")?.attr("src")
                 ?: selectFirst("img")?.attr("data-src")
                 ?: selectFirst("img")?.attr("data-lazy")
+                ?: selectFirst("img")?.attr("data-original")
         )
 
         return newMovieSearchResponse(title, href, TvType.NSFW) {
@@ -53,6 +57,7 @@ class PinayCum : MainAPI() {
         val poster = fixUrlNull(
             document.selectFirst("meta[property=og:image]")?.attr("content")
                 ?: document.selectFirst("img")?.attr("src")
+                ?: document.selectFirst("img")?.attr("data-src")
         )
 
         val description = document.selectFirst("meta[property=og:description]")?.attr("content")
@@ -72,67 +77,48 @@ class PinayCum : MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
-        val document = app.get(data, referer = mainUrl).document
+        // Handle both pinaycum.tv and pinaycumvid.xyz links
+        val realUrl = if (data.contains("pinaycum.tv")) {
+            data.replace("pinaycum.tv", "pinaycumvid.xyz")
+        } else data
+
+        val document = app.get(realUrl, referer = mainUrl).document
         var found = false
 
-        // Extract all provider links (doodstream, streamruby, vidara, etc.)
-        document.select("a[href*='?s=']").forEach { el ->
-            val providerUrl = fixUrlNull(el.attr("href"))
-            if (providerUrl != null) {
-                // Try to load the provider page
-                val providerDoc = app.get(providerUrl, referer = mainUrl).document
-
-                // Look for direct video sources
-                providerDoc.select("video[src], source[src], a[href*='.mp4'], a[href*='.m3u8']").forEach { videoEl ->
-                    val videoUrl = fixUrlNull(videoEl.attr("src") ?: videoEl.attr("href"))
-                    if (videoUrl != null && (videoUrl.contains(".mp4") || videoUrl.contains(".m3u8"))) {
-                        callback(
-                            newExtractorLink(
-                                name = name,
-                                source = "Direct",
-                                url = videoUrl,
-                                type = ExtractorLinkType.VIDEO
-                            ) {
-                                this.referer = mainUrl
-                                this.quality = Qualities.Unknown.value
-                            }
-                        )
-                        found = true
-                    }
-                }
-
-                // Also try vidaratem.com directly
-                providerDoc.selectFirst("a[href*='vidaratem.com']")?.attr("href")?.let { vidLink ->
-                    callback(
-                        newExtractorLink(
-                            name = name,
-                            source = "Vidaratem",
-                            url = fixUrl(vidLink),
-                            type = ExtractorLinkType.VIDEO
-                        ) {
-                            this.referer = mainUrl
-                            this.quality = Qualities.Unknown.value
-                        }
-                    )
-                    found = true
-                }
-            }
-        }
-
-        // Fallback: Direct vidaratem from main page
+        // Primary Source: Vidaratem Direct Download (this is the main one on the site)
         document.selectFirst("a[href*='vidaratem.com']")?.attr("href")?.let { link ->
+            val fixedLink = fixUrl(link)
             callback(
                 newExtractorLink(
                     name = name,
                     source = "Vidaratem",
-                    url = fixUrl(link),
+                    url = fixedLink,
                     type = ExtractorLinkType.VIDEO
                 ) {
-                    this.referer = mainUrl
+                    this.referer = "https://pinaycumvid.xyz"
                     this.quality = Qualities.Unknown.value
                 }
             )
             found = true
+        }
+
+        // Fallback: Any other direct video links
+        document.select("a[href*='.mp4'], a[href*='.m3u8'], video[src], source[src]").forEach { el ->
+            val src = fixUrlNull(el.attr("src") ?: el.attr("href"))
+            if (src != null) {
+                callback(
+                    newExtractorLink(
+                        name = name,
+                        source = "Direct",
+                        url = src,
+                        type = ExtractorLinkType.VIDEO
+                    ) {
+                        this.referer = "https://pinaycumvid.xyz"
+                        this.quality = Qualities.Unknown.value
+                    }
+                )
+                found = true
+            }
         }
 
         return found
