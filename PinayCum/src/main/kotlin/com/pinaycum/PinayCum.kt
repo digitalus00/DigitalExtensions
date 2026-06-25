@@ -12,8 +12,6 @@ class PinayCum : MainAPI() {
     override val hasMainPage = true
     override val hasQuickSearch = true
 
-    // Removed hasSearch (it doesn't exist in newer API)
-
     override val mainPage = mainPageOf(
         "$mainUrl/" to "Latest Videos",
     )
@@ -73,31 +71,35 @@ class PinayCum : MainAPI() {
     ): Boolean {
         val document = app.get(data).document
 
-        // Main Download Link
+        // Main Download Link (vidaratem.com)
         document.selectFirst("a[href*='vidaratem.com']")?.attr("href")?.let { link ->
             callback(
                 newExtractorLink(
+                    name = name,
                     source = name,
-                    name = "Direct Download",
                     url = fixUrl(link),
-                    referer = mainUrl,
-                    quality = Qualities.Unknown.value
-                )
+                    type = ExtractorLinkType.VIDEO
+                ) {
+                    this.referer = mainUrl
+                    this.quality = Qualities.Unknown.value
+                }
             )
         }
 
-        // Video sources
+        // Any direct video sources
         document.select("video[src], source[src]").forEach { el ->
             val src = fixUrlNull(el.attr("src"))
             if (src != null) {
                 callback(
                     newExtractorLink(
+                        name = name,
                         source = name,
-                        name = "Video Source",
                         url = src,
-                        referer = mainUrl,
-                        quality = Qualities.Unknown.value
-                    )
+                        type = ExtractorLinkType.VIDEO
+                    ) {
+                        this.referer = mainUrl
+                        this.quality = Qualities.Unknown.value
+                    }
                 )
             }
         }
