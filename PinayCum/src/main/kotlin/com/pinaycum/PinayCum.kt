@@ -18,25 +18,28 @@ class PinayCum : MainAPI() {
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
         val url = if (page <= 1) request.data else "${request.data.removeSuffix("/")}/page/$page/"
-        val document = app.get(url).document
+        val document = app.get(url, referer = mainUrl).document
         val items = document.select("a[href*='watch.php?id=']").mapNotNull { it.toSearchResult() }
         return newHomePageResponse(request.name, items, hasNext = true)
     }
 
     override suspend fun search(query: String, page: Int): SearchResponseList? {
         val url = if (page <= 1) "$mainUrl/?s=$query" else "$mainUrl/?s=$query&page=$page"
-        val document = app.get(url).document
+        val document = app.get(url, referer = mainUrl).document
         val results = document.select("a[href*='watch.php?id=']").mapNotNull { it.toSearchResult() }
         return newSearchResponseList(results, hasNext = true)
     }
 
     private fun Element.toSearchResult(): SearchResponse? {
-        val title = selectFirst("h2, strong, .title, a")?.text()?.trim()
-            ?: ownText().trim().takeIf { it.isNotEmpty() }
-            ?: return null
+        val titleElement = selectFirst("h2, strong, .title, a") ?: return null
+        val title = titleElement.text().trim()
+        val href = fixUrlNull(titleElement.attr("href")) ?: return null
 
-        val href = fixUrlNull(attr("href")) ?: return null
-        val poster = fixUrlNull(selectFirst("img")?.attr("src") ?: selectFirst("img")?.attr("data-src"))
+        val poster = fixUrlNull(
+            selectFirst("img")?.attr("src")
+                ?: selectFirst("img")?.attr("data-src")
+                ?: selectFirst("img")?.attr("data-lazy")
+        )
 
         return newMovieSearchResponse(title, href, TvType.NSFW) {
             this.posterUrl = poster
@@ -44,7 +47,7 @@ class PinayCum : MainAPI() {
     }
 
     override suspend fun load(url: String): LoadResponse? {
-        val document = app.get(url).document
+        val document = app.get(url, referer = mainUrl).document
         val title = document.selectFirst("h1, h2, title")?.text()?.trim() ?: "Pinay Video"
 
         val poster = fixUrlNull(
@@ -69,14 +72,59 @@ class PinayCum : MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
-        val document = app.get(data).document
+        val document = app.get(data, referer = mainUrl).document
+        var found = false
 
-        // Main Download Link (vidaratem.com)
+        // Extract all provider links (doodstream, streamruby, vidara, etc.)
+        document.select("a[href*='?s=']").forEach { el ->
+            val providerUrl = fixUrlNull(el.attr("href"))
+            if (providerUrl != null) {
+                // Try to load the provider page
+                val providerDoc = app.get(providerUrl, referer = mainUrl).document
+
+                // Look for direct video sources
+                providerDoc.select("video[src], source[src], a[href*='.mp4'], a[href*='.m3u8']").forEach { videoEl ->
+                    val videoUrl = fixUrlNull(videoEl.attr("src") ?: videoEl.attr("href"))
+                    if (videoUrl != null && (videoUrl.contains(".mp4") || videoUrl.contains(".m3u8"))) {
+                        callback(
+                            newExtractorLink(
+                                name = name,
+                                source = "Direct",
+                                url = videoUrl,
+                                type = ExtractorLinkType.VIDEO
+                            ) {
+                                this.referer = mainUrl
+                                this.quality = Qualities.Unknown.value
+                            }
+                        )
+                        found = true
+                    }
+                }
+
+                // Also try vidaratem.com directly
+                providerDoc.selectFirst("a[href*='vidaratem.com']")?.attr("href")?.let { vidLink ->
+                    callback(
+                        newExtractorLink(
+                            name = name,
+                            source = "Vidaratem",
+                            url = fixUrl(vidLink),
+                            type = ExtractorLinkType.VIDEO
+                        ) {
+                            this.referer = mainUrl
+                            this.quality = Qualities.Unknown.value
+                        }
+                    )
+                    found = true
+                }
+            }
+        }
+
+        // Fallback: Direct vidaratem from main page
         document.selectFirst("a[href*='vidaratem.com']")?.attr("href")?.let { link ->
             callback(
                 newExtractorLink(
                     name = name,
-                    source = name,
+                    source = "Vidaratem",
                     url = fixUrl(link),
                     type = ExtractorLinkType.VIDEO
                 ) {
@@ -84,26 +132,9 @@ class PinayCum : MainAPI() {
                     this.quality = Qualities.Unknown.value
                 }
             )
+            found = true
         }
 
-        // Any direct video sources
-        document.select("video[src], source[src]").forEach { el ->
-            val src = fixUrlNull(el.attr("src"))
-            if (src != null) {
-                callback(
-                    newExtractorLink(
-                        name = name,
-                        source = name,
-                        url = src,
-                        type = ExtractorLinkType.VIDEO
-                    ) {
-                        this.referer = mainUrl
-                        this.quality = Qualities.Unknown.value
-                    }
-                )
-            }
-        }
-
-        return true
+        return found
     }
 }
