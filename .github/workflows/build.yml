@@ -13,12 +13,9 @@ on:
       - '*.md'
       - 'repo.json'
       - 'DomainCheck.py'
-<<<<<<< HEAD
-  workflow_dispatch:
-=======
-  workflow_dispatch:    
->>>>>>> 769ad64f68bbc699d967b47fc6481541c76d3398
 
+  workflow_dispatch:
+  
 permissions:
   contents: write
 
