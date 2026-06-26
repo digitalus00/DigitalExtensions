@@ -91,69 +91,77 @@ class PinayCum : MainAPI() {
         val pageHtml = res?.text ?: ""
         val document = res?.document
 
-        // 1. Text Sweep StreamRuby Extraction
-        Regex("""https?://(?:streamruby|rubystream|rubyembed|rubystr|struby|streamr)[^\s"'><]+""").findAll(pageHtml).forEach { match ->
-            val cleanUrl = match.value
-            if (processedUrls.add(cleanUrl)) {
-                try {
-                    val rubyResponse = app.get(cleanUrl, headers = defHeaders, referer = data).text
-                    Regex("""["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""").find(rubyResponse)?.groupValues?.get(1)?.let { directStreamUrl ->
-                        callback(newExtractorLink("StreamRuby", "StreamRuby Mirror", directStreamUrl, if (directStreamUrl.contains(".m3u8")) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO))
-                        found = true
-                    }
-                } catch (_: Exception) {}
-            }
-        }
-
-        // 2. Direct Fallback Sweep for Primary Hosts (Dood / Lulu)
+        // 1. Core Native System Extraction (DoodStream / LuluStream)
+        // Passes the URLs to system engines directly to clear duplicate issues and Error 3003
         Regex("""https?://(?:doodstream\.com|dood\.[^\s"'><]+|ds2play\.[^\s"'><]+)/[efd]/[a-zA-Z0-9]+""").findAll(pageHtml).forEach { match ->
             val embedUrl = match.value.replace("/d/", "/e/").replace("/f/", "/e/")
             if (processedUrls.add(embedUrl)) {
-                callback(newExtractorLink("DoodStream", "DoodStream Mirror", embedUrl, ExtractorLinkType.VIDEO))
-                found = true
+                if (loadExtractor(embedUrl, data, subtitleCallback, callback)) found = true
             }
         }
 
         Regex("""https?://(?:lulustream|lulu)[^\s"'><]+""").findAll(pageHtml).forEach { match ->
             val luluUrl = match.value
             if (processedUrls.add(luluUrl)) {
-                callback(newExtractorLink("LuluStream", "LuluStream Mirror", luluUrl, ExtractorLinkType.VIDEO))
-                found = true
+                if (loadExtractor(luluUrl, data, subtitleCallback, callback)) found = true
             }
         }
 
-        // 3. Vidara Extraction Sweep
-        Regex("""https?://(?:vidaara|vidaarax)[\w-]*\.[a-z]+/e/[\w-]+""").findAll(pageHtml).forEach { match ->
-            val embedUrl = match.value
-            if (processedUrls.add(embedUrl)) {
+        // 2. Specialized Manual StreamRuby Aggressive Extractor
+        Regex("""https?://(?:streamruby|rubystream|rubyembed|rubystr|struby|streamr)[^\s"'><]+""").findAll(pageHtml).forEach { match ->
+            val cleanUrl = match.value
+            if (processedUrls.add(cleanUrl)) {
                 try {
-                    val embedDoc = app.get(embedUrl, headers = defHeaders, referer = mainUrl).text
-                    Regex("""["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""").find(embedDoc)?.groupValues?.get(1)?.let { streamUrl ->
-                        callback(newExtractorLink(name, "Vidara Direct", streamUrl, if (streamUrl.contains(".m3u8")) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO))
+                    val rubyResponse = app.get(cleanUrl, headers = defHeaders, referer = data).text
+                    Regex("""["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""").find(rubyResponse)?.groupValues?.get(1)?.let { directStreamUrl ->
+                        val isM3u8 = directStreamUrl.contains(".m3u8")
+                        callback(
+                            ExtractorLink(
+                                source = "StreamRuby",
+                                name = "StreamRuby Mirror",
+                                url = directStreamUrl,
+                                referer = cleanUrl,
+                                quality = Qualities.Unknown.value,
+                                type = if (isM3u8) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO,
+                                headers = mapOf("User-Agent" to defHeaders["User-Agent"]!!, "Referer" to cleanUrl)
+                            )
+                        )
                         found = true
                     }
                 } catch (_: Exception) {}
             }
         }
 
-        // 4. Structural Verification of External Source Redirect Targets
+        // 3. Robust Vidara Direct Extractor
+        Regex("""https?://(?:vidaara|vidaarax)[\w-]*\.[a-z]+/e/[\w-]+""").findAll(pageHtml).forEach { match ->
+            val embedUrl = match.value
+            if (processedUrls.add(embedUrl)) {
+                try {
+                    val embedDoc = app.get(embedUrl, headers = defHeaders, referer = mainUrl).text
+                    Regex("""["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""").find(embedDoc)?.groupValues?.get(1)?.let { streamUrl ->
+                        val isM3u8 = streamUrl.contains(".m3u8")
+                        callback(
+                            ExtractorLink(
+                                source = "Vidara",
+                                name = "Vidara Direct",
+                                url = streamUrl,
+                                referer = embedUrl,
+                                quality = Qualities.Unknown.value,
+                                type = if (isM3u8) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO,
+                                headers = mapOf("User-Agent" to defHeaders["User-Agent"]!!, "Referer" to embedUrl, "Origin" to "https://vidaarax.net")
+                            )
+                        )
+                        found = true
+                    }
+                } catch (_: Exception) {}
+            }
+        }
+
+        // 4. Structural External Server Buttons Fallback Pass
         if (document != null) {
             val playerButtons = document.select("a.btn-dark[href*='&s='], a.btn-primary[href*='&s=']")
             for (playerBtn in playerButtons) {
                 val playerUrl = fixUrl(playerBtn.attr("href"))
-                val btnName = playerBtn.text().trim()
-
-                if ((playerUrl.contains("dood") || playerUrl.contains("ds2play")) && processedUrls.add(playerUrl.replace("/d/", "/e/"))) {
-                    callback(newExtractorLink("DoodStream", "$btnName (DoodStream)", playerUrl.replace("/d/", "/e/"), ExtractorLinkType.VIDEO))
-                    found = true
-                    continue
-                }
-                if (playerUrl.contains("lulu") && processedUrls.add(playerUrl)) {
-                    callback(newExtractorLink("LuluStream", "$btnName (LuluStream)", playerUrl, ExtractorLinkType.VIDEO))
-                    found = true
-                    continue
-                }
-
                 try {
                     val playerDoc = app.get(playerUrl, headers = defHeaders, referer = data).document
                     val collectedUrls = mutableListOf<String>()
@@ -167,15 +175,17 @@ class PinayCum : MainAPI() {
                         if (cleanUrl.contains("ruby") || cleanUrl.contains("streamruby") || cleanUrl.contains("struby")) {
                             val rubyResponse = app.get(cleanUrl, headers = defHeaders, referer = playerUrl).text
                             Regex("""["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""").find(rubyResponse)?.groupValues?.get(1)?.let { directUrl ->
-                                callback(newExtractorLink("StreamRuby", "$btnName (StreamRuby)", directUrl, if (directUrl.contains(".m3u8")) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO))
+                                callback(ExtractorLink("StreamRuby", "StreamRuby Server", directUrl, cleanUrl, Qualities.Unknown.value, if (directUrl.contains(".m3u8")) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO, mapOf("User-Agent" to defHeaders["User-Agent"]!!, "Referer" to cleanUrl)))
                                 found = true
                             }
-                        } else if (cleanUrl.contains("dood") || cleanUrl.contains("ds2play")) {
-                            callback(newExtractorLink("DoodStream", "$btnName (DoodStream)", cleanUrl.replace("/d/", "/e/"), ExtractorLinkType.VIDEO))
-                            found = true
-                        } else if (cleanUrl.contains("lulu")) {
-                            callback(newExtractorLink("LuluStream", "$btnName (LuluStream)", cleanUrl, ExtractorLinkType.VIDEO))
-                            found = true
+                        } else if (cleanUrl.contains("vidaara") || cleanUrl.contains("vidara")) {
+                            val embedDoc = app.get(cleanUrl, headers = defHeaders, referer = playerUrl).text
+                            Regex("""["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""").find(embedDoc)?.groupValues?.get(1)?.let { directUrl ->
+                                callback(ExtractorLink("Vidara", "Vidara Server", directUrl, cleanUrl, Qualities.Unknown.value, if (directUrl.contains(".m3u8")) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO, mapOf("User-Agent" to defHeaders["User-Agent"]!!, "Referer" to cleanUrl, "Origin" to "https://vidaarax.net")))
+                                found = true
+                            }
+                        } else {
+                            if (loadExtractor(cleanUrl, playerUrl, subtitleCallback, callback)) found = true
                         }
                     }
                 } catch (_: Exception) {}
