@@ -16,7 +16,37 @@ class PinayCum : MainAPI() {
         "$mainUrl/" to "Latest Videos",
     )
 
-    // ... (getMainPage, search, toSearchResult, load functions remain the same as previous version)
+    override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        val url = if (page <= 1) request.data else "${request.data.removeSuffix("/")}/?page=$page"
+        val document = app.get(url, referer = mainUrl).document
+        val items = document.select("a[href*='watch.php?id=']").mapNotNull { it.toSearchResult() }
+        return newHomePageResponse(request.name, items, hasNext = true)
+    }
+
+    override suspend fun search(query: String, page: Int): SearchResponseList? {
+        val url = if (page <= 1) "$mainUrl/?s=$query" else "$mainUrl/?s=$query&page=$page"
+        val document = app.get(url, referer = mainUrl).document
+        val results = document.select("a[href*='watch.php?id=']").mapNotNull { it.toSearchResult() }
+        return newSearchResponseList(results, hasNext = true)
+    }
+
+    private fun Element.toSearchResult(): SearchResponse? {
+        val title = selectFirst("h6.vid-title strong, .vid-title, strong")?.text()?.trim() ?: return null
+        val href = fixUrlNull(attr("href")) ?: return null
+
+        var poster = selectFirst("img")?.attr("src")
+            ?: selectFirst("div[style*='background']")?.attr("style")?.let {
+                Regex("url\\([\"']?(.*?)['\"]?\\)").find(it)?.groupValues?.get(1)
+            }
+
+        if (poster != null) {
+            poster = fixUrl(poster)
+        }
+
+        return newMovieSearchResponse(title, href, TvType.NSFW) {
+            this.posterUrl = poster
+        }
+    }
 
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url, referer = mainUrl).document
@@ -27,7 +57,9 @@ class PinayCum : MainAPI() {
                 Regex("url\\([\"']?(.*?)['\"]?\\)").find(it)?.groupValues?.get(1)
             }
 
-        if (poster != null) poster = fixUrl(poster)
+        if (poster != null) {
+            poster = fixUrl(poster)
+        }
 
         val description = document.selectFirst("meta[property=og:description]")?.attr("content")
 
@@ -49,7 +81,7 @@ class PinayCum : MainAPI() {
         val document = app.get(data, referer = mainUrl).document
         var found = false
 
-        // === 1. Player Buttons (Vidara, Lulustream, etc.) ===
+        // Player buttons
         document.select("a.btn-dark[href*='&s=']").forEach { btn ->
             val playerUrl = fixUrl(btn.attr("href"))
             val playerName = btn.text().trim()
@@ -57,32 +89,34 @@ class PinayCum : MainAPI() {
             try {
                 val playerDoc = app.get(playerUrl, referer = data).document
 
-                // Try iframe
-                playerDoc.selectFirst("iframe")?.attr("src")?.let { iframe ->
-                    loadExtractor(iframe, playerUrl, subtitleCallback, callback)
+                // iframe
+                playerDoc.selectFirst("iframe")?.attr("src")?.let { iframeSrc ->
+                    loadExtractor(fixUrl(iframeSrc), playerUrl, subtitleCallback, callback)
                     found = true
                 }
 
-                // Direct sources if any
-                playerDoc.select("source[src], video[src], a[href*='.mp4'], a[href*='.m3u8']").forEach { el ->
+                // direct sources
+                playerDoc.select("source[src*='.mp4'], source[src*='.m3u8'], a[href*='.mp4']").forEach { el ->
                     val src = fixUrlNull(el.attr("src") ?: el.attr("href"))
                     if (src != null) {
-                        callback(ExtractorLink(
-                            source = name,
-                            name = playerName,
-                            url = src,
-                            referer = playerUrl,
-                            quality = Qualities.Unknown.value
-                        ))
+                        callback(
+                            newExtractorLink(
+                                source = name,
+                                name = playerName,
+                                url = src,
+                                referer = playerUrl,
+                                quality = Qualities.Unknown.value
+                            )
+                        )
                         found = true
                     }
                 }
             } catch (_: Exception) {}
         }
 
-        // === 2. Direct Vidaara Embed (Most Important) ===
-        Regex("""https?://vidaarax\.net/e/[\w-]+""").find(document.toString())?.value?.let { vidaaraUrl ->
-            loadExtractor(vidaaraUrl, data, subtitleCallback, callback)
+        // Vidaara Direct Embed
+        Regex("""https?://vidaarax\.net/e/[\w-]+""").find(document.toString())?.value?.let { embedUrl ->
+            loadExtractor(embedUrl, data, subtitleCallback, callback)
             found = true
         }
 
