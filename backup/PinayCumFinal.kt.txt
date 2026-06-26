@@ -1,0 +1,244 @@
+package com.pinaycum
+
+import com.lagradost.cloudstream3.*
+import com.lagradost.cloudstream3.utils.*
+import org.jsoup.nodes.Element
+
+class PinayCum : MainAPI() {
+    override var mainUrl = "https://pinaycumvid.xyz"
+    override var name = "PinayCum"
+    override val supportedTypes = setOf(TvType.NSFW)
+    override var lang = "tl"
+    override val hasMainPage = true
+    override val hasQuickSearch = true
+
+    override val mainPage = mainPageOf(
+        "$mainUrl/" to "Latest Videos",
+    )
+
+    override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
+        val url = if (page <= 1) request.data else "${request.data.removeSuffix("/")}/?page=$page"
+        val document = app.get(url, referer = mainUrl).document
+        
+        val items = document.select(".video-block, .col-md-3, .thumb-block, .item, .post, div:has(a[href*='watch.php?id='])").mapNotNull { 
+            it.toSearchResult() 
+        }.distinctBy { it.url }
+
+        val finalItems = if (items.isEmpty()) {
+            document.select("a[href*='watch.php?id=']").mapNotNull { it.toSearchResult() }
+        } else items
+
+        return newHomePageResponse(request.name, finalItems, hasNext = true)
+    }
+
+    override suspend fun search(query: String, page: Int): SearchResponseList? {
+        val url = if (page <= 1) "$mainUrl/?s=$query" else "$mainUrl/?s=$query&page=$page"
+        val document = app.get(url, referer = mainUrl).document
+        
+        val results = document.select(".video-block, .col-md-3, .thumb-block, .item, .post, div:has(a[href*='watch.php?id='])").mapNotNull { 
+            it.toSearchResult() 
+        }.distinctBy { it.url }
+
+        val finalResults = if (results.isEmpty()) {
+            document.select("a[href*='watch.php?id=']").mapNotNull { it.toSearchResult() }
+        } else results
+
+        return newSearchResponseList(finalResults, hasNext = true)
+    }
+
+    private fun Element.toSearchResult(): SearchResponse? {
+        val anchor = if (this.tagName() == "a") this else this.selectFirst("a[href*='watch.php?id=']")
+        val href = fixUrlNull(anchor?.attr("href")) ?: return null
+        
+        // Dynamic clean extraction list targeting structural nodes over random metadata items
+        val primaryTitle = selectFirst("h6.vid-title strong, .vid-title, h3, h4, .title")?.text()?.trim()
+        val anchorTitle = anchor?.text()?.trim()
+
+        // Clean-up filter checklist strategy to verify the title isn't just metadata
+        fun isValidTitle(text: String?): Boolean {
+            if (text.isNullOrEmpty()) return false
+            // Rejects pure numbers, metadata years (e.g. 2013), and short timing strings
+            if (text.matches(Regex("""^\d{4}$"""))) return false
+            if (text.contains(Regex("""(?i)\b(years? ago|months? ago|days? ago|views?)\b"""))) return false
+            return true
+        }
+
+        val title = when {
+            isValidTitle(primaryTitle) -> primaryTitle!!
+            isValidTitle(anchorTitle) -> anchorTitle!!
+            !anchorTitle.isNullOrEmpty() -> anchorTitle
+            !primaryTitle.isNullOrEmpty() -> primaryTitle
+            else -> return null
+        }
+
+        val imgEl = selectFirst("img")
+        
+        var poster = selectFirst("[style*='background']")?.attr("style")?.let {
+            Regex("url\\([\"']?(.*?)['\"]?\\)").find(it)?.groupValues?.get(1)
+        } ?: this.attr("style").let { 
+            Regex("url\\([\"']?(.*?)['\"]?\\)").find(it)?.groupValues?.get(1)
+        } ?: imgEl?.attr("data-webp")
+          ?: imgEl?.attr("data-src")
+          ?: imgEl?.attr("data-original")
+          ?: imgEl?.attr("data-thumb")
+          ?: imgEl?.attr("src")
+
+        if (poster != null && (poster.contains("style-853x480.png") || poster.contains("assets/img"))) {
+            val videoId = Regex("""id=(\d+)""").find(href)?.groupValues?.get(1)
+            poster = if (videoId != null) {
+                "https://pinaycumvid.xyz/contents/videos_screenshots/${videoId.toInt() / 1000 * 1000}/$videoId/preview.mp4.jpg"
+            } else {
+                null
+            }
+        }
+
+        if (poster != null) {
+            if (poster.startsWith("//")) {
+                poster = "https:$poster"
+            }
+            poster = fixUrl(poster)
+        }
+
+        return newMovieSearchResponse(title, href, TvType.NSFW) {
+            this.posterUrl = poster
+        }
+    }
+
+    override suspend fun load(url: String): LoadResponse? {
+        val document = app.get(url, referer = mainUrl).document
+        val title = document.selectFirst("h4, h1, title")?.text()?.trim() ?: "Pinay Video"
+
+        var poster = document.selectFirst("meta[property=og:image]")?.attr("content")
+            ?: document.selectFirst("div#preroll-overlay")?.attr("style")?.let {
+                Regex("url\\([\"']?(.*?)['\"]?\\)").find(it)?.groupValues?.get(1)
+            }
+            ?: document.selectFirst("img")?.attr("src")
+
+        if (poster != null) {
+            poster = fixUrl(poster)
+        }
+
+        val description = document.selectFirst("meta[property=og:description]")?.attr("content")
+        
+        // Strict mapping processing for recommended section elements
+        val recommendations = document.select(".video-block, .col-md-3, .thumb-block, .item, .post, div:has(a[href*='watch.php?id='])").mapNotNull { 
+            it.toSearchResult() 
+        }.distinctBy { it.url }
+
+        return newMovieLoadResponse(title, url, TvType.NSFW, url) {
+            this.posterUrl = poster
+            this.plot = description
+            this.recommendations = recommendations
+        }
+    }
+
+    override suspend fun loadLinks(
+        data: String,
+        isCdn: Boolean,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
+    ): Boolean {
+        val document = app.get(data, referer = mainUrl).document
+        val rawHtml = document.toString()
+        var found = false
+        val processedUrls = mutableSetOf<String>()
+
+        // ==========================================
+        // BLOCK A: VIDARA DIRECT BLOCK (PRIORITY #1)
+        // ==========================================
+        Regex("""https?://vidaarax\.net/e/[\w-]+""").find(rawHtml)?.value?.let { embedUrl ->
+            if (processedUrls.add(embedUrl)) {
+                try {
+                    val embedDoc = app.get(embedUrl, referer = mainUrl).text
+                    val streamUrlRegex = Regex("""["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""")
+                    val streamUrl = streamUrlRegex.find(embedDoc)?.groupValues?.get(1)
+
+                    if (streamUrl != null) {
+                        val isM3u8 = streamUrl.contains(".m3u8")
+                        callback(
+                            newExtractorLink(
+                                source = name,
+                                name = "Vidara Direct (Fixed)",
+                                url = streamUrl,
+                                type = if (isM3u8) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO
+                            )
+                        )
+                        found = true
+                    } else {
+                        if (loadExtractor(embedUrl, mainUrl, subtitleCallback, callback)) found = true
+                    }
+                } catch (e: Exception) {
+                    if (loadExtractor(embedUrl, mainUrl, subtitleCallback, callback)) found = true
+                }
+            }
+        }
+
+        // ==========================================
+        // BLOCK B: LULUSTREAM MANUAL BLOCK (PRIORITY #2)
+        // ==========================================
+        Regex("""https?://(?:lulustream|lulu)[^\s"'><]+""").findAll(rawHtml).map { it.value }.forEach { rawUrl ->
+            val embedUrl = rawUrl.replace("/d/", "/e/").replace("/f/", "/e/")
+            if (processedUrls.add(embedUrl)) {
+                try {
+                    val embedDoc = app.get(embedUrl, referer = mainUrl).text
+                    val streamUrlRegex = Regex("""["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""")
+                    val streamUrl = streamUrlRegex.find(embedDoc)?.groupValues?.get(1)
+
+                    if (streamUrl != null) {
+                        val isM3u8 = streamUrl.contains(".m3u8")
+                        callback(
+                            newExtractorLink(
+                                source = "LuluStream",
+                                name = "LuluStream Manual Direct",
+                                url = streamUrl,
+                                type = if (isM3u8) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO
+                            )
+                        )
+                        found = true
+                    }
+                } catch (_: Exception) {}
+            }
+        }
+
+        // ==========================================
+        // BLOCK C: STREAMRUBY MANUAL BLOCK (PRIORITY #3)
+        // ==========================================
+        Regex("""https?://(?:streamruby|rubystream|rubyembed|rubystr|struby|streamr)[^\s"'><]+""").findAll(rawHtml).map { it.value }.forEach { rawUrl ->
+            val embedUrl = rawUrl.replace("/d/", "/e/").replace("/f/", "/e/")
+            if (processedUrls.add(embedUrl)) {
+                try {
+                    val embedDoc = app.get(embedUrl, referer = mainUrl).text
+                    val streamUrlRegex = Regex("""["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""")
+                    val streamUrl = streamUrlRegex.find(embedDoc)?.groupValues?.get(1)
+
+                    if (streamUrl != null) {
+                        val isM3u8 = streamUrl.contains(".m3u8")
+                        callback(
+                            newExtractorLink(
+                                source = "StreamRuby",
+                                name = "StreamRuby Manual Direct",
+                                url = streamUrl,
+                                type = if (isM3u8) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO
+                            )
+                        )
+                        found = true
+                    }
+                } catch (_: Exception) {}
+            }
+        }
+
+        // ==========================================
+        // BLOCK D: DOODSTREAM SEPARATE TARGET BLOCK (PRIORITY #4)
+        // ==========================================
+        Regex("""https?://(?:doodstream\.com|dood\.[^\s"'><]+|ds2play\.[^\s"'><]+)/[efd]/[a-zA-Z0-9]+""").findAll(rawHtml).map { it.value }.forEach { rawUrl ->
+            val embedUrl = rawUrl.replace("/d/", "/e/").replace("/f/", "/e/")
+            if (processedUrls.add(embedUrl)) {
+                if (loadExtractor(embedUrl, data, subtitleCallback, callback)) {
+                    found = true
+                }
+            }
+        }
+
+        return found
+    }
+}
