@@ -6,7 +6,7 @@ import org.jsoup.nodes.Element
 
 class PinayCum : MainAPI() {
     override var mainUrl = "https://pinaycumvid.xyz"
-    override var name = "PinayCum"           // ← This must be set
+    override var name = "PinayCum"
     override val supportedTypes = setOf(TvType.NSFW)
     override var lang = "tl"
     override val hasMainPage = true
@@ -31,20 +31,21 @@ class PinayCum : MainAPI() {
     }
 
     private fun Element.toSearchResult(): SearchResponse? {
-        val title = selectFirst("h6.vid-title strong, .vid-title, h4, strong")?.text()?.trim()
-            ?: return null
-
+        val title = selectFirst("h6.vid-title strong, .vid-title, strong")?.text()?.trim() ?: return null
         val href = fixUrlNull(attr("href")) ?: return null
 
-        val poster = fixUrlNull(
-            selectFirst("img")?.attr("src")
-                ?: selectFirst("div[style*='background:url']")?.attr("style")?.let {
-                    Regex("url\\([\"']?(.*?)['\"]?\\)").find(it)?.groupValues?.get(1)
-                }
-        )
+        // Better poster extraction for homepage
+        var poster = selectFirst("img")?.attr("src")
+            ?: selectFirst("div[style*='background']")?.attr("style")?.let {
+                Regex("url\\([\"']?(.*?)['\"]?\\)").find(it)?.groupValues?.get(1)
+            }
+
+        if (poster?.startsWith("00IMG/") == true) {
+            poster = fixUrl(poster, mainUrl)
+        }
 
         return newMovieSearchResponse(title, href, TvType.NSFW) {
-            this.posterUrl = poster
+            this.posterUrl = fixUrlNull(poster)
         }
     }
 
@@ -52,14 +53,23 @@ class PinayCum : MainAPI() {
         val document = app.get(url, referer = mainUrl).document
         val title = document.selectFirst("h4, h1, title")?.text()?.trim() ?: "Pinay Video"
 
-        val poster = fixUrlNull(document.selectFirst("meta[property=og:image]")?.attr("content"))
+        // Better poster extraction on watch page
+        var poster = document.selectFirst("meta[property=og:image]")?.attr("content")
+            ?: document.selectFirst("div#preroll-overlay")?.attr("style")?.let {
+                Regex("url\\([\"']?(.*?)['\"]?\\)").find(it)?.groupValues?.get(1)
+            }
+            ?: document.selectFirst("img")?.attr("src")
+
+        if (poster?.startsWith("00IMG/") == true) {
+            poster = fixUrl(poster, mainUrl)
+        }
 
         val description = document.selectFirst("meta[property=og:description]")?.attr("content")
 
         val recommendations = document.select("a[href*='watch.php?id=']").mapNotNull { it.toSearchResult() }
 
         return newMovieLoadResponse(title, url, TvType.NSFW, url) {
-            this.posterUrl = poster
+            this.posterUrl = fixUrlNull(poster)
             this.plot = description
             this.recommendations = recommendations
         }
@@ -74,36 +84,59 @@ class PinayCum : MainAPI() {
         val document = app.get(data, referer = mainUrl).document
         var found = false
 
-        // Player buttons
-        document.select("a.btn-dark[href*='&s=']").forEach { el ->
-            val playerUrl = fixUrl(el.attr("href"))
-            val playerName = el.text().trim()
+        // Extract all player buttons
+        document.select("a.btn-dark[href*='&s=']").forEach { playerBtn ->
+            val playerUrl = fixUrl(playerBtn.attr("href"))
+            val playerText = playerBtn.text().trim()
 
-            val playerDoc = app.get(playerUrl, referer = data).document
-            val iframe = playerDoc.selectFirst("iframe")?.attr("src")
+            try {
+                val playerDoc = app.get(playerUrl, referer = data).document
 
-            if (iframe != null) {
-                callback(
-                    ExtractorLink(
-                        source = name,
-                        name = playerName.ifEmpty { "Player" },
-                        url = fixUrl(iframe),
-                        referer = playerUrl,
-                        quality = Qualities.Unknown.value,
-                        type = ExtractorLinkType.VIDEO
+                // Look for iframe
+                val iframeSrc = playerDoc.selectFirst("iframe")?.attr("src")
+                if (iframeSrc != null) {
+                    callback(
+                        ExtractorLink(
+                            source = name,
+                            name = playerText.ifEmpty { "Player" },
+                            url = fixUrl(iframeSrc),
+                            referer = playerUrl,
+                            quality = Qualities.Unknown.value,
+                            type = ExtractorLinkType.VIDEO
+                        )
                     )
-                )
-                found = true
+                    found = true
+                }
+
+                // Look for direct mp4
+                playerDoc.select("source[src*='.mp4'], a[href*='.mp4']").forEach { srcEl ->
+                    val src = fixUrlNull(srcEl.attr("src") ?: srcEl.attr("href"))
+                    if (src != null) {
+                        callback(
+                            ExtractorLink(
+                                source = name,
+                                name = "$playerText Direct",
+                                url = src,
+                                referer = playerUrl,
+                                quality = Qualities.Unknown.value,
+                                type = ExtractorLinkType.VIDEO
+                            )
+                        )
+                        found = true
+                    }
+                }
+            } catch (e: Exception) {
+                // Ignore failed player
             }
         }
 
-        // Vidaara Direct Fallback
-        Regex("""https?://vidaarax\.net/e/[\w-]+""").find(document.toString())?.value?.let { embed ->
+        // Direct Vidaara / Vidara extraction (most reliable)
+        Regex("""https?://vidaarax\.net/e/[\w-]+""").find(document.toString())?.value?.let { embedUrl ->
             callback(
                 ExtractorLink(
                     source = name,
                     name = "Vidara Direct",
-                    url = embed,
+                    url = embedUrl,
                     referer = mainUrl,
                     quality = Qualities.Unknown.value,
                     type = ExtractorLinkType.VIDEO
