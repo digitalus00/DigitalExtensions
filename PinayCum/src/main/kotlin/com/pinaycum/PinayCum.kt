@@ -78,6 +78,7 @@ class PinayCum : MainAPI() {
         }
     }
 
+    @Suppress("DEPRECATION")
     override suspend fun loadLinks(
         data: String,
         isCdn: Boolean,
@@ -115,11 +116,12 @@ class PinayCum : MainAPI() {
                     Regex("""["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""").find(rubyResponse)?.groupValues?.get(1)?.let { directStreamUrl ->
                         val isM3u8 = directStreamUrl.contains(".m3u8")
                         callback(
-                            newExtractorLink(
+                            ExtractorLink(
                                 source = "StreamRuby",
                                 name = "StreamRuby Mirror",
                                 url = directStreamUrl,
                                 referer = cleanUrl,
+                                quality = Qualities.Unknown.value,
                                 type = if (isM3u8) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO,
                                 headers = mapOf("User-Agent" to defHeaders["User-Agent"]!!, "Referer" to cleanUrl)
                             )
@@ -139,11 +141,12 @@ class PinayCum : MainAPI() {
                     Regex("""["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""").find(embedDoc)?.groupValues?.get(1)?.let { streamUrl ->
                         val isM3u8 = streamUrl.contains(".m3u8")
                         callback(
-                            newExtractorLink(
+                            ExtractorLink(
                                 source = "Vidara",
                                 name = "Vidara Direct",
                                 url = streamUrl,
                                 referer = embedUrl,
+                                quality = Qualities.Unknown.value,
                                 type = if (isM3u8) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO,
                                 headers = mapOf("User-Agent" to defHeaders["User-Agent"]!!, "Referer" to embedUrl, "Origin" to "https://vidaarax.net")
                             )
@@ -174,11 +177,12 @@ class PinayCum : MainAPI() {
                             Regex("""["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""").find(rubyResponse)?.groupValues?.get(1)?.let { directUrl ->
                                 val isM3u8 = directUrl.contains(".m3u8")
                                 callback(
-                                    newExtractorLink(
+                                    ExtractorLink(
                                         source = "StreamRuby",
                                         name = "StreamRuby Server",
                                         url = directUrl,
                                         referer = cleanUrl,
+                                        quality = Qualities.Unknown.value,
                                         type = if (isM3u8) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO,
                                         headers = mapOf("User-Agent" to defHeaders["User-Agent"]!!, "Referer" to cleanUrl)
                                     )
@@ -190,11 +194,12 @@ class PinayCum : MainAPI() {
                             Regex("""["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""").find(embedDoc)?.groupValues?.get(1)?.let { directUrl ->
                                 val isM3u8 = directUrl.contains(".m3u8")
                                 callback(
-                                    newExtractorLink(
+                                    ExtractorLink(
                                         source = "Vidara",
                                         name = "Vidara Server",
                                         url = directUrl,
                                         referer = cleanUrl,
+                                        quality = Qualities.Unknown.value,
                                         type = if (isM3u8) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO,
                                         headers = mapOf("User-Agent" to defHeaders["User-Agent"]!!, "Referer" to cleanUrl, "Origin" to "https://vidaarax.net")
                                     )
