@@ -3,6 +3,8 @@ plugins {
     id("com.lagradost.cloudstream3.gradle") // Use the template's current version
 }
 
+version = 1.1
+
 cloudstream {
     authors     = listOf("Grok")
     language    = "tl"
