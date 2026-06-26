@@ -77,7 +77,7 @@ class PinayCum : MainAPI() {
         val document = app.get(data, referer = mainUrl).document
         var found = false
 
-        // Player buttons (Vidara, etc.)
+        // Player buttons
         document.select("a.btn-dark[href*='&s=']").forEach { btn ->
             val playerUrl = fixUrl(btn.attr("href"))
             val playerName = btn.text().trim()
@@ -91,17 +91,17 @@ class PinayCum : MainAPI() {
                     found = true
                 }
 
-                // direct mp4 / m3u8
+                // direct links
                 playerDoc.select("source[src*='.mp4'], source[src*='.m3u8'], a[href*='.mp4']").forEach { el ->
                     val src = fixUrlNull(el.attr("src") ?: el.attr("href"))
                     if (src != null) {
                         callback(
-                            ExtractorLink(
-                                name,           // source
-                                playerName,     // name
-                                src,            // url
-                                playerUrl,      // referer
-                                Qualities.Unknown.value
+                            newExtractorLink(
+                                source = name,
+                                name = playerName,
+                                url = src,
+                                referer = playerUrl,
+                                quality = Qualities.Unknown.value
                             )
                         )
                         found = true
@@ -110,7 +110,7 @@ class PinayCum : MainAPI() {
             } catch (_: Exception) {}
         }
 
-        // Vidaara Direct
+        // Vidaara Direct Embed
         Regex("""https?://vidaarax\.net/e/[\w-]+""").find(document.toString())?.value?.let { embedUrl ->
             loadExtractor(embedUrl, data, subtitleCallback, callback)
             found = true
