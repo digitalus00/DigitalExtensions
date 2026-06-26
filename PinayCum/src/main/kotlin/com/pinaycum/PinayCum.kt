@@ -19,26 +19,53 @@ class PinayCum : MainAPI() {
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
         val url = if (page <= 1) request.data else "${request.data.removeSuffix("/")}/?page=$page"
         val document = app.get(url, referer = mainUrl).document
-        val items = document.select("a[href*='watch.php?id=']").mapNotNull { it.toSearchResult() }
-        return newHomePageResponse(request.name, items, hasNext = true)
+        
+        // Find the parent containers instead of just the anchor tag
+        val items = document.select(".video-block, .col-md-3, .thumb-block, .item, div:has(a[href*='watch.php?id='])").mapNotNull { 
+            it.toSearchResult() 
+        }.distinctBy { it.url }
+
+        // Fallback to old selector if parent container query returns empty
+        val finalItems = if (items.isEmpty()) {
+            document.select("a[href*='watch.php?id=']").mapNotNull { it.toSearchResult() }
+        } else items
+
+        return newHomePageResponse(request.name, finalItems, hasNext = true)
     }
 
     override suspend fun search(query: String, page: Int): SearchResponseList? {
         val url = if (page <= 1) "$mainUrl/?s=$query" else "$mainUrl/?s=$query&page=$page"
         val document = app.get(url, referer = mainUrl).document
-        val results = document.select("a[href*='watch.php?id=']").mapNotNull { it.toSearchResult() }
-        return newSearchResponseList(results, hasNext = true)
+        
+        val results = document.select(".video-block, .col-md-3, .thumb-block, .item, div:has(a[href*='watch.php?id='])").mapNotNull { 
+            it.toSearchResult() 
+        }.distinctBy { it.url }
+
+        val finalResults = if (results.isEmpty()) {
+            document.select("a[href*='watch.php?id=']").mapNotNull { it.toSearchResult() }
+        } else results
+
+        return newSearchResponseList(finalResults, hasNext = true)
     }
 
     private fun Element.toSearchResult(): SearchResponse? {
-        val title = selectFirst("h6.vid-title strong, .vid-title, strong")?.text()?.trim() ?: return null
-        val href = fixUrlNull(attr("href")) ?: return null
+        // Find the link whether this Element is the link itself or its parent container
+        val anchor = if (this.tagName() == "a") this else this.selectFirst("a[href*='watch.php?id=']")
+        val href = fixUrlNull(anchor?.attr("href")) ?: return null
+        
+        // Extract title safely
+        val title = selectFirst("h6.vid-title strong, .vid-title, strong, h3, h4")?.text()?.trim() 
+            ?: anchor?.text()?.trim() 
+            ?: return null
 
-        // Exhaustive fallback image location checks
+        // Exhaustive fallback image location checks across attributes and parent styling styles
         var poster = selectFirst("img")?.attr("data-src")
             ?: selectFirst("img")?.attr("data-original")
             ?: selectFirst("img")?.attr("src")
-            ?: selectFirst(".video-img, .thumb, .thumbnail")?.attr("style")?.let {
+            ?: selectFirst("[style*='background']")?.attr("style")?.let {
+                Regex("url\\([\"']?(.*?)['\"]?\\)").find(it)?.groupValues?.get(1)
+            }
+            ?: this.attr("style").let { 
                 Regex("url\\([\"']?(.*?)['\"]?\\)").find(it)?.groupValues?.get(1)
             }
             ?: attr("data-poster")
