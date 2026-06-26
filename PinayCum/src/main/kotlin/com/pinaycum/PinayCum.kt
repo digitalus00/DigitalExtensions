@@ -92,7 +92,6 @@ class PinayCum : MainAPI() {
         val document = res?.document
 
         // 1. Core Native System Extraction (DoodStream / LuluStream)
-        // Passes the URLs to system engines directly to clear duplicate issues and Error 3003
         Regex("""https?://(?:doodstream\.com|dood\.[^\s"'><]+|ds2play\.[^\s"'><]+)/[efd]/[a-zA-Z0-9]+""").findAll(pageHtml).forEach { match ->
             val embedUrl = match.value.replace("/d/", "/e/").replace("/f/", "/e/")
             if (processedUrls.add(embedUrl)) {
@@ -107,7 +106,7 @@ class PinayCum : MainAPI() {
             }
         }
 
-        // 2. Specialized Manual StreamRuby Aggressive Extractor
+        // 2. StreamRuby Direct Manual Extraction
         Regex("""https?://(?:streamruby|rubystream|rubyembed|rubystr|struby|streamr)[^\s"'><]+""").findAll(pageHtml).forEach { match ->
             val cleanUrl = match.value
             if (processedUrls.add(cleanUrl)) {
@@ -116,12 +115,11 @@ class PinayCum : MainAPI() {
                     Regex("""["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""").find(rubyResponse)?.groupValues?.get(1)?.let { directStreamUrl ->
                         val isM3u8 = directStreamUrl.contains(".m3u8")
                         callback(
-                            ExtractorLink(
+                            newExtractorLink(
                                 source = "StreamRuby",
                                 name = "StreamRuby Mirror",
                                 url = directStreamUrl,
                                 referer = cleanUrl,
-                                quality = Qualities.Unknown.value,
                                 type = if (isM3u8) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO,
                                 headers = mapOf("User-Agent" to defHeaders["User-Agent"]!!, "Referer" to cleanUrl)
                             )
@@ -132,7 +130,7 @@ class PinayCum : MainAPI() {
             }
         }
 
-        // 3. Robust Vidara Direct Extractor
+        // 3. Vidara Direct Manual Extraction
         Regex("""https?://(?:vidaara|vidaarax)[\w-]*\.[a-z]+/e/[\w-]+""").findAll(pageHtml).forEach { match ->
             val embedUrl = match.value
             if (processedUrls.add(embedUrl)) {
@@ -141,12 +139,11 @@ class PinayCum : MainAPI() {
                     Regex("""["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""").find(embedDoc)?.groupValues?.get(1)?.let { streamUrl ->
                         val isM3u8 = streamUrl.contains(".m3u8")
                         callback(
-                            ExtractorLink(
+                            newExtractorLink(
                                 source = "Vidara",
                                 name = "Vidara Direct",
                                 url = streamUrl,
                                 referer = embedUrl,
-                                quality = Qualities.Unknown.value,
                                 type = if (isM3u8) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO,
                                 headers = mapOf("User-Agent" to defHeaders["User-Agent"]!!, "Referer" to embedUrl, "Origin" to "https://vidaarax.net")
                             )
@@ -157,7 +154,7 @@ class PinayCum : MainAPI() {
             }
         }
 
-        // 4. Structural External Server Buttons Fallback Pass
+        // 4. Structural External Server Target Sweeps
         if (document != null) {
             val playerButtons = document.select("a.btn-dark[href*='&s='], a.btn-primary[href*='&s=']")
             for (playerBtn in playerButtons) {
@@ -175,13 +172,33 @@ class PinayCum : MainAPI() {
                         if (cleanUrl.contains("ruby") || cleanUrl.contains("streamruby") || cleanUrl.contains("struby")) {
                             val rubyResponse = app.get(cleanUrl, headers = defHeaders, referer = playerUrl).text
                             Regex("""["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""").find(rubyResponse)?.groupValues?.get(1)?.let { directUrl ->
-                                callback(ExtractorLink("StreamRuby", "StreamRuby Server", directUrl, cleanUrl, Qualities.Unknown.value, if (directUrl.contains(".m3u8")) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO, mapOf("User-Agent" to defHeaders["User-Agent"]!!, "Referer" to cleanUrl)))
+                                val isM3u8 = directUrl.contains(".m3u8")
+                                callback(
+                                    newExtractorLink(
+                                        source = "StreamRuby",
+                                        name = "StreamRuby Server",
+                                        url = directUrl,
+                                        referer = cleanUrl,
+                                        type = if (isM3u8) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO,
+                                        headers = mapOf("User-Agent" to defHeaders["User-Agent"]!!, "Referer" to cleanUrl)
+                                    )
+                                )
                                 found = true
                             }
                         } else if (cleanUrl.contains("vidaara") || cleanUrl.contains("vidara")) {
                             val embedDoc = app.get(cleanUrl, headers = defHeaders, referer = playerUrl).text
                             Regex("""["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""").find(embedDoc)?.groupValues?.get(1)?.let { directUrl ->
-                                callback(ExtractorLink("Vidara", "Vidara Server", directUrl, cleanUrl, Qualities.Unknown.value, if (directUrl.contains(".m3u8")) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO, mapOf("User-Agent" to defHeaders["User-Agent"]!!, "Referer" to cleanUrl, "Origin" to "https://vidaarax.net")))
+                                val isM3u8 = directUrl.contains(".m3u8")
+                                callback(
+                                    newExtractorLink(
+                                        source = "Vidara",
+                                        name = "Vidara Server",
+                                        url = directUrl,
+                                        referer = cleanUrl,
+                                        type = if (isM3u8) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO,
+                                        headers = mapOf("User-Agent" to defHeaders["User-Agent"]!!, "Referer" to cleanUrl, "Origin" to "https://vidaarax.net")
+                                    )
+                                )
                                 found = true
                             }
                         } else {
