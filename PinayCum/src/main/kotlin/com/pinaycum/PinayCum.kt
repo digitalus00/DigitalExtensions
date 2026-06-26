@@ -77,7 +77,7 @@ class PinayCum : MainAPI() {
         val document = app.get(data, referer = mainUrl).document
         var found = false
 
-        // Player buttons
+        // Player buttons (Vidara, etc.)
         document.select("a.btn-dark[href*='&s=']").forEach { btn ->
             val playerUrl = fixUrl(btn.attr("href"))
             val playerName = btn.text().trim()
@@ -85,23 +85,23 @@ class PinayCum : MainAPI() {
             try {
                 val playerDoc = app.get(playerUrl, referer = data).document
 
-                // iframe → let loadExtractor handle it
+                // iframe
                 playerDoc.selectFirst("iframe")?.attr("src")?.let { iframeSrc ->
                     loadExtractor(fixUrl(iframeSrc), playerUrl, subtitleCallback, callback)
                     found = true
                 }
 
-                // direct video files
+                // direct mp4 / m3u8
                 playerDoc.select("source[src*='.mp4'], source[src*='.m3u8'], a[href*='.mp4']").forEach { el ->
                     val src = fixUrlNull(el.attr("src") ?: el.attr("href"))
                     if (src != null) {
                         callback(
-                            newExtractorLink(
-                                source = name,
-                                name = playerName,
-                                url = src,
-                                referer = playerUrl,
-                                quality = Qualities.Unknown.value
+                            ExtractorLink(
+                                name,           // source
+                                playerName,     // name
+                                src,            // url
+                                playerUrl,      // referer
+                                Qualities.Unknown.value
                             )
                         )
                         found = true
@@ -110,7 +110,7 @@ class PinayCum : MainAPI() {
             } catch (_: Exception) {}
         }
 
-        // Vidaara Direct Embed
+        // Vidaara Direct
         Regex("""https?://vidaarax\.net/e/[\w-]+""").find(document.toString())?.value?.let { embedUrl ->
             loadExtractor(embedUrl, data, subtitleCallback, callback)
             found = true
