@@ -34,10 +34,14 @@ class PinayCum : MainAPI() {
         val title = selectFirst("h6.vid-title strong, .vid-title, strong")?.text()?.trim() ?: return null
         val href = fixUrlNull(attr("href")) ?: return null
 
-        var poster = selectFirst("img")?.attr("src")
-            ?: selectFirst("div[style*='background']")?.attr("style")?.let {
+        // Exhaustive fallback image location checks
+        var poster = selectFirst("img")?.attr("data-src")
+            ?: selectFirst("img")?.attr("data-original")
+            ?: selectFirst("img")?.attr("src")
+            ?: selectFirst(".video-img, .thumb, .thumbnail")?.attr("style")?.let {
                 Regex("url\\([\"']?(.*?)['\"]?\\)").find(it)?.groupValues?.get(1)
             }
+            ?: attr("data-poster")
 
         if (poster != null) {
             poster = fixUrl(poster)
