@@ -3,6 +3,7 @@ package com.pinaycum
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import org.jsoup.nodes.Element
+import android.util.Base64
 
 class PinayCum : MainAPI() {
     override var mainUrl = "https://pinaycumvid.xyz"
@@ -88,25 +89,19 @@ class PinayCum : MainAPI() {
         var found = false
         val processedUrls = mutableSetOf<String>()
 
-        // Load the page source directly using proper page verification rules
         val res = try { app.get(data, headers = defHeaders, referer = mainUrl) } catch(e: Exception) { null }
         val pageHtml = res?.text ?: ""
         val document = res?.document
 
-        // Global sweep matches any link structural instances directly embedded inside text blocks
-        val rawMatches = Regex("""https?://[^\s"'><]+""").findAll(pageHtml).map { it.value }.toList()
-        
-        // Target host collection pipeline
-        for (rawUrl in rawMatches) {
-            val cleanUrl = fixUrlNull(rawUrl) ?: continue
-            if (!processedUrls.add(cleanUrl)) continue
+        // High performance link unpacking pipeline
+        suspend fun parseAndAddUrl(rawUrl: String): Boolean {
+            val cleanUrl = fixUrlNull(rawUrl) ?: return false
+            if (!processedUrls.add(cleanUrl)) return false
 
-            try {
-                if (cleanUrl.contains("dood") || cleanUrl.contains("ds2play")) {
+            return try {
+                if (cleanUrl.contains("dood") || cleanUrl.contains("ds2play") || cleanUrl.contains("lulu") || cleanUrl.contains("lulustream")) {
                     val embedUrl = cleanUrl.replace("/d/", "/e/").replace("/f/", "/e/")
-                    if (loadExtractor(embedUrl, data, subtitleCallback, callback)) found = true
-                } else if (cleanUrl.contains("lulu") || cleanUrl.contains("lulustream")) {
-                    if (loadExtractor(cleanUrl, data, subtitleCallback, callback)) found = true
+                    loadExtractor(embedUrl, data, subtitleCallback, callback)
                 } else if (cleanUrl.contains("ruby") || cleanUrl.contains("streamruby") || cleanUrl.contains("struby")) {
                     val rubyResponse = app.get(cleanUrl, headers = defHeaders, referer = data).text
                     Regex("""["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""").find(rubyResponse)?.groupValues?.get(1)?.let { directStreamUrl ->
@@ -122,8 +117,8 @@ class PinayCum : MainAPI() {
                                 headers = mapOf("User-Agent" to defHeaders["User-Agent"]!!, "Referer" to cleanUrl)
                             )
                         )
-                        found = true
-                    }
+                        true
+                    } ?: false
                 } else if (cleanUrl.contains("vidaara") || cleanUrl.contains("vidara")) {
                     val embedDoc = app.get(cleanUrl, headers = defHeaders, referer = data).text
                     Regex("""["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""").find(embedDoc)?.groupValues?.get(1)?.let { streamUrl ->
@@ -139,35 +134,46 @@ class PinayCum : MainAPI() {
                                 headers = mapOf("User-Agent" to defHeaders["User-Agent"]!!, "Referer" to cleanUrl, "Origin" to "https://vidaarax.net")
                             )
                         )
-                        found = true
+                        true
+                    } ?: false
+                } else false
+            } catch (_: Exception) { false }
+        }
+
+        // Step 1: Broad Raw Plaintext Stream Discovery
+        Regex("""https?://[^\s"'><]+""").findAll(pageHtml).forEach { match ->
+            if (parseAndAddUrl(match.value)) found = true
+        }
+
+        // Step 2: Base64 Obfuscation Layer Breakdown Checks
+        Regex("""[a-zA-Z0-9+/]{40,}={0,2}""").findAll(pageHtml).forEach { match ->
+            try {
+                val decoded = String(Base64.decode(match.value, Base64.DEFAULT))
+                if (decoded.contains("http") && (decoded.contains("dood") || decoded.contains("lulu") || decoded.contains("ruby") || decoded.contains("vid"))) {
+                    Regex("""https?://[^\s"'><]+""").findAll(decoded).forEach { subMatch ->
+                        if (parseAndAddUrl(subMatch.value)) found = true
                     }
                 }
             } catch (_: Exception) {}
         }
 
-        // Secondary Pass: Extract explicitly from any visual player components on screen
-        if (document != null) {
-            val playerButtons = document.select("a[href*='&s='], iframe[src]")
-            for (element in playerButtons) {
-                val targetUrl = fixUrlNull(element.attr("href").takeIf { it.isNotEmpty() } ?: element.attr("src")) ?: continue
-                if (!processedUrls.add(targetUrl)) continue
-
-                try {
-                    if (targetUrl.contains("dood") || targetUrl.contains("ds2play") || targetUrl.contains("lulu")) {
-                        val embedUrl = targetUrl.replace("/d/", "/e/").replace("/f/", "/e/")
-                        if (loadExtractor(embedUrl, data, subtitleCallback, callback)) found = true
-                    } else {
-                        // Fallback processing for dynamic configurations
-                        val subResponse = app.get(targetUrl, headers = defHeaders, referer = data).text
-                        Regex("""https?://[^\s"'><]+""").findAll(subResponse).map { it.value }.forEach { subUrl ->
-                            if ((subUrl.contains("dood") || subUrl.contains("ds2play") || subUrl.contains("lulu")) && processedUrls.add(subUrl)) {
-                                val cleanSubUrl = subUrl.replace("/d/", "/e/").replace("/f/", "/e/")
-                                loadExtractor(cleanSubUrl, targetUrl, subtitleCallback, callback)
-                                found = true
+        // Step 3: Global Exhaustive Structural Attribute Verification Scan
+        document?.allElements?.forEach { element ->
+            listOf("href", "src", "data-src", "data-link", "data-video", "value").forEach { attr ->
+                val value = element.attr(attr).trim()
+                if (value.isNotEmpty()) {
+                    if (value.startsWith("http")) {
+                        if (parseAndAddUrl(value)) found = true
+                    } else if (value.contains("&s=") || value.contains("watch.php")) {
+                        try {
+                            val buttonUrl = fixUrl(value)
+                            val subPage = app.get(buttonUrl, headers = defHeaders, referer = data).text
+                            Regex("""https?://[^\s"'><]+""").findAll(subPage).forEach { subMatch ->
+                                if (parseAndAddUrl(subMatch.value)) found = true
                             }
-                        }
+                        } catch (_: Exception) {}
                     }
-                } catch (_: Exception) {}
+                }
             }
         }
 
