@@ -79,69 +79,103 @@ class PinayCum : MainAPI() {
         callback: (ExtractorLink) -> Unit
     ): Boolean {
         val document = app.get(data, referer = mainUrl).document
+        val rawHtml = document.toString()
         var found = false
+        val processedUrls = mutableSetOf<String>()
 
-        // Extract player buttons
-        document.select("a.btn-dark[href*='&s=']").forEach { playerBtn ->
-            val playerUrl = fixUrl(playerBtn.attr("href"))
+        // ==========================================
+        // BLOCK A: VIDARA DIRECT BLOCK (PRIORITY #1)
+        // ==========================================
+        Regex("""https?://vidaarax\.net/e/[\w-]+""").find(rawHtml)?.value?.let { embedUrl ->
+            if (processedUrls.add(embedUrl)) {
+                try {
+                    val embedDoc = app.get(embedUrl, referer = mainUrl).text
+                    val streamUrlRegex = Regex("""["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""")
+                    val streamUrl = streamUrlRegex.find(embedDoc)?.groupValues?.get(1)
 
-            try {
-                val playerDoc = app.get(playerUrl, referer = data).document
-
-                // Look for iframe
-                playerDoc.selectFirst("iframe")?.attr("src")?.let { iframeSrc ->
-                    callback(
-                        newExtractorLink(
-                            source = name,
-                            name = playerBtn.text().trim(),
-                            url = iframeSrc,
-                            type = ExtractorLinkType.VIDEO
-                        )
-                    )
-                    found = true
-                }
-
-                // Look for direct mp4
-                playerDoc.select("source[src*='.mp4'], a[href*='.mp4']").forEach { el ->
-                    val src = fixUrlNull(el.attr("src") ?: el.attr("href"))
-                    if (src != null) {
+                    if (streamUrl != null) {
+                        val isM3u8 = streamUrl.contains(".m3u8")
                         callback(
                             newExtractorLink(
                                 source = name,
-                                name = "${playerBtn.text().trim()} Direct",
-                                url = src,
-                                type = ExtractorLinkType.VIDEO
+                                name = "Vidara Direct (Fixed)",
+                                url = streamUrl,
+                                type = if (isM3u8) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO
+                            )
+                        )
+                        found = true
+                    } else {
+                        if (loadExtractor(embedUrl, mainUrl, subtitleCallback, callback)) found = true
+                    }
+                } catch (e: Exception) {
+                    if (loadExtractor(embedUrl, mainUrl, subtitleCallback, callback)) found = true
+                }
+            }
+        }
+
+        // ==========================================
+        // BLOCK B: LULUSTREAM MANUAL BLOCK (PRIORITY #2)
+        // ==========================================
+        Regex("""https?://(?:lulustream|lulu)[^\s"'><]+""").findAll(rawHtml).map { it.value }.forEach { rawUrl ->
+            val embedUrl = rawUrl.replace("/d/", "/e/").replace("/f/", "/e/")
+            if (processedUrls.add(embedUrl)) {
+                try {
+                    val embedDoc = app.get(embedUrl, referer = mainUrl).text
+                    val streamUrlRegex = Regex("""["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""")
+                    val streamUrl = streamUrlRegex.find(embedDoc)?.groupValues?.get(1)
+
+                    if (streamUrl != null) {
+                        val isM3u8 = streamUrl.contains(".m3u8")
+                        callback(
+                            newExtractorLink(
+                                source = "LuluStream",
+                                name = "LuluStream Manual Direct",
+                                url = streamUrl,
+                                type = if (isM3u8) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO
                             )
                         )
                         found = true
                     }
-                }
-            } catch (_: Exception) {}
+                } catch (_: Exception) {}
+            }
         }
 
-        // Vidaara Direct Fix Block
-        Regex("""https?://vidaarax\.net/e/[\w-]+""").find(document.toString())?.value?.let { embedUrl ->
-            try {
-                val embedDoc = app.get(embedUrl, referer = mainUrl).text
-                val streamUrlRegex = Regex("""["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""")
-                val streamUrl = streamUrlRegex.find(embedDoc)?.groupValues?.get(1)
+        // ==========================================
+        // BLOCK C: STREAMRUBY MANUAL BLOCK (PRIORITY #3)
+        // ==========================================
+        Regex("""https?://(?:streamruby|rubystream|rubyembed|rubystr|struby|streamr)[^\s"'><]+""").findAll(rawHtml).map { it.value }.forEach { rawUrl ->
+            val embedUrl = rawUrl.replace("/d/", "/e/").replace("/f/", "/e/")
+            if (processedUrls.add(embedUrl)) {
+                try {
+                    val embedDoc = app.get(embedUrl, referer = mainUrl).text
+                    val streamUrlRegex = Regex("""["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""")
+                    val streamUrl = streamUrlRegex.find(embedDoc)?.groupValues?.get(1)
 
-                if (streamUrl != null) {
-                    val isM3u8 = streamUrl.contains(".m3u8")
-                    callback(
-                        newExtractorLink(
-                            source = name,
-                            name = "Vidara Direct (Fixed)",
-                            url = streamUrl,
-                            type = if (isM3u8) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO
+                    if (streamUrl != null) {
+                        val isM3u8 = streamUrl.contains(".m3u8")
+                        callback(
+                            newExtractorLink(
+                                source = "StreamRuby",
+                                name = "StreamRuby Manual Direct",
+                                url = streamUrl,
+                                type = if (isM3u8) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO
+                            )
                         )
-                    )
+                        found = true
+                    }
+                } catch (_: Exception) {}
+            }
+        }
+
+        // ==========================================
+        // BLOCK D: DOODSTREAM SEPARATE TARGET BLOCK (PRIORITY #4)
+        // ==========================================
+        Regex("""https?://(?:doodstream\.com|dood\.[^\s"'><]+|ds2play\.[^\s"'><]+)/[efd]/[a-zA-Z0-9]+""").findAll(rawHtml).map { it.value }.forEach { rawUrl ->
+            val embedUrl = rawUrl.replace("/d/", "/e/").replace("/f/", "/e/")
+            if (processedUrls.add(embedUrl)) {
+                if (loadExtractor(embedUrl, data, subtitleCallback, callback)) {
                     found = true
-                } else {
-                    found = loadExtractor(embedUrl, mainUrl, subtitleCallback, callback)
                 }
-            } catch (e: Exception) {
-                found = loadExtractor(embedUrl, mainUrl, subtitleCallback, callback)
             }
         }
 
