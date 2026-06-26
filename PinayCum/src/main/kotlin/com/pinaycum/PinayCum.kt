@@ -50,12 +50,26 @@ class PinayCum : MainAPI() {
         val anchor = if (this.tagName() == "a") this else this.selectFirst("a[href*='watch.php?id=']")
         val href = fixUrlNull(anchor?.attr("href")) ?: return null
         
-        // Clean up title extraction logic to skip metadata/years
-        var title = selectFirst("h6.vid-title strong, .vid-title, strong, h3, h4, .title")?.text()?.trim()
-        if (title.isNullOrEmpty() || title.matches(Regex("""\d{4}.*"""))) {
-            title = anchor?.text()?.trim()
+        // Dynamic clean extraction list targeting structural nodes over random metadata items
+        val primaryTitle = selectFirst("h6.vid-title strong, .vid-title, h3, h4, .title")?.text()?.trim()
+        val anchorTitle = anchor?.text()?.trim()
+
+        // Clean-up filter checklist strategy to verify the title isn't just metadata
+        fun isValidTitle(text: String?): Boolean {
+            if (text.isNullOrEmpty()) return false
+            // Rejects pure numbers, metadata years (e.g. 2013), and short timing strings
+            if (text.matches(Regex("""^\d{4}$"""))) return false
+            if (text.contains(Regex("""(?i)\b(years? ago|months? ago|days? ago|views?)\b"""))) return false
+            return true
         }
-        if (title.isNullOrEmpty()) return null
+
+        val title = when {
+            isValidTitle(primaryTitle) -> primaryTitle!!
+            isValidTitle(anchorTitle) -> anchorTitle!!
+            !anchorTitle.isNullOrEmpty() -> anchorTitle
+            !primaryTitle.isNullOrEmpty() -> primaryTitle
+            else -> return null
+        }
 
         val imgEl = selectFirst("img")
         
@@ -106,11 +120,10 @@ class PinayCum : MainAPI() {
 
         val description = document.selectFirst("meta[property=og:description]")?.attr("content")
         
-        // Dynamic Recommendation Parser Strategy (Bypasses parent block duplicate bugs)
-        val recommendations = document.select("a[href*='watch.php?id=']").filter { element ->
-            // Exclude main elements and player controls to filter layout noise
-            !element.hasClass("btn") && element.selectFirst("img") != null
-        }.mapNotNull { it.toSearchResult() }.distinctBy { it.url }
+        // Strict mapping processing for recommended section elements
+        val recommendations = document.select(".video-block, .col-md-3, .thumb-block, .item, .post, div:has(a[href*='watch.php?id='])").mapNotNull { 
+            it.toSearchResult() 
+        }.distinctBy { it.url }
 
         return newMovieLoadResponse(title, url, TvType.NSFW, url) {
             this.posterUrl = poster
