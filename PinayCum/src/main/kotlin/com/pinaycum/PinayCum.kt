@@ -39,11 +39,8 @@ class PinayCum : MainAPI() {
                 Regex("url\\([\"']?(.*?)['\"]?\\)").find(it)?.groupValues?.get(1)
             }
 
-        if (poster?.startsWith("00IMG/") == true) {
-            poster = fixUrl(poster, mainUrl)
-        }
         if (poster != null) {
-            poster = fixUrl(poster, mainUrl)
+            poster = fixUrl(poster)
         }
 
         return newMovieSearchResponse(title, href, TvType.NSFW) {
@@ -61,11 +58,8 @@ class PinayCum : MainAPI() {
             }
             ?: document.selectFirst("img")?.attr("src")
 
-        if (poster?.startsWith("00IMG/") == true) {
-            poster = fixUrl(poster, mainUrl)
-        }
         if (poster != null) {
-            poster = fixUrl(poster, mainUrl)
+            poster = fixUrl(poster)
         }
 
         val description = document.selectFirst("meta[property=og:description]")?.attr("content")
@@ -89,7 +83,7 @@ class PinayCum : MainAPI() {
 
         // Extract player buttons
         document.select("a.btn-dark[href*='&s=']").forEach { playerBtn ->
-            val playerUrl = fixUrl(playerBtn.attr("href"), mainUrl)
+            val playerUrl = fixUrl(playerBtn.attr("href"))
 
             try {
                 val playerDoc = app.get(playerUrl, referer = data).document
@@ -101,8 +95,6 @@ class PinayCum : MainAPI() {
                             source = name,
                             name = playerBtn.text().trim(),
                             url = iframeSrc,
-                            referer = playerUrl,
-                            quality = Qualities.Unknown.value,
                             type = ExtractorLinkType.VIDEO
                         )
                     )
@@ -118,8 +110,6 @@ class PinayCum : MainAPI() {
                                 source = name,
                                 name = "${playerBtn.text().trim()} Direct",
                                 url = src,
-                                referer = playerUrl,
-                                quality = Qualities.Unknown.value,
                                 type = ExtractorLinkType.VIDEO
                             )
                         )
@@ -143,8 +133,6 @@ class PinayCum : MainAPI() {
                             source = name,
                             name = "Vidara Direct (Fixed)",
                             url = streamUrl,
-                            referer = embedUrl,
-                            quality = Qualities.Unknown.value,
                             type = if (isM3u8) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO
                         )
                     )
