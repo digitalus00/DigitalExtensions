@@ -127,19 +127,40 @@ class PinayCum : MainAPI() {
 
         // Direct Vidaara / Vidara extraction (most reliable)
         // Vidaara Direct (most important source)
+        // Vidaara Direct Fix
         Regex("""https?://vidaarax\.net/e/[\w-]+""").find(document.toString())?.value?.let { embedUrl ->
-            callback(
-                ExtractorLink(
-                    source = name,
-                    name = "Vidara Direct",
-                    url = embedUrl,
-                    referer = mainUrl,
-                    quality = Qualities.Unknown.value,
-                    type = ExtractorLinkType.VIDEO
-                )
-            )
-            found = true
+            try {
+                // 1. Fetch the actual embed HTML page
+                val embedDoc = app.get(embedUrl, referer = mainUrl).text
+                
+                // 2. Extract the hidden streaming file URL (often bundled in javascript)
+                // This regex seeks typical master.m3u8, index.m3u8, or direct file matches inside scripts
+                val streamUrlRegex = Regex("""["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""")
+                val streamUrl = streamUrlRegex.find(embedDoc)?.groupValues?.get(1)
+
+                if (streamUrl != null) {
+                    val isM3u8 = streamUrl.contains(".m3u8")
+                    callback(
+                        ExtractorLink(
+                            source = name,
+                            name = "Vidara Direct (Fixed)",
+                            url = streamUrl,
+                            referer = embedUrl, // The embed page acts as the referer here
+                            quality = Qualities.Unknown.value,
+                            type = if (isM3u8) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO
+                        )
+                    )
+                    found = true
+                } else {
+                    // Fallback: If direct stream extraction fails, try using native extractors
+                    found = loadExtractor(embedUrl, mainUrl, callback)
+                }
+            } catch (e: Exception) {
+                // Log or handle failed network call gracefully
+                found = loadExtractor(embedUrl, mainUrl, callback)
+            }
         }
 
         return found
     }
+}
