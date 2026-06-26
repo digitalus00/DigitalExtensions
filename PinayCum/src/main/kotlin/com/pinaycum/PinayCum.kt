@@ -20,12 +20,10 @@ class PinayCum : MainAPI() {
         val url = if (page <= 1) request.data else "${request.data.removeSuffix("/")}/?page=$page"
         val document = app.get(url, referer = mainUrl).document
         
-        // Find the parent containers instead of just the anchor tag
-        val items = document.select(".video-block, .col-md-3, .thumb-block, .item, div:has(a[href*='watch.php?id='])").mapNotNull { 
+        val items = document.select(".video-block, .col-md-3, .thumb-block, .item, .post, div:has(a[href*='watch.php?id='])").mapNotNull { 
             it.toSearchResult() 
         }.distinctBy { it.url }
 
-        // Fallback to old selector if parent container query returns empty
         val finalItems = if (items.isEmpty()) {
             document.select("a[href*='watch.php?id=']").mapNotNull { it.toSearchResult() }
         } else items
@@ -37,7 +35,7 @@ class PinayCum : MainAPI() {
         val url = if (page <= 1) "$mainUrl/?s=$query" else "$mainUrl/?s=$query&page=$page"
         val document = app.get(url, referer = mainUrl).document
         
-        val results = document.select(".video-block, .col-md-3, .thumb-block, .item, div:has(a[href*='watch.php?id='])").mapNotNull { 
+        val results = document.select(".video-block, .col-md-3, .thumb-block, .item, .post, div:has(a[href*='watch.php?id='])").mapNotNull { 
             it.toSearchResult() 
         }.distinctBy { it.url }
 
@@ -49,28 +47,41 @@ class PinayCum : MainAPI() {
     }
 
     private fun Element.toSearchResult(): SearchResponse? {
-        // Find the link whether this Element is the link itself or its parent container
         val anchor = if (this.tagName() == "a") this else this.selectFirst("a[href*='watch.php?id=']")
         val href = fixUrlNull(anchor?.attr("href")) ?: return null
         
-        // Extract title safely
-        val title = selectFirst("h6.vid-title strong, .vid-title, strong, h3, h4")?.text()?.trim() 
+        val title = selectFirst("h6.vid-title strong, .vid-title, strong, h3, h4, .title")?.text()?.trim() 
             ?: anchor?.text()?.trim() 
             ?: return null
 
-        // Exhaustive fallback image location checks across attributes and parent styling styles
-        var poster = selectFirst("img")?.attr("data-src")
-            ?: selectFirst("img")?.attr("data-original")
-            ?: selectFirst("img")?.attr("src")
-            ?: selectFirst("[style*='background']")?.attr("style")?.let {
-                Regex("url\\([\"']?(.*?)['\"]?\\)").find(it)?.groupValues?.get(1)
+        val imgEl = selectFirst("img")
+        
+        // 1. Core structural background scanner (overrides blank image placeholder tags)
+        var poster = selectFirst("[style*='background']")?.attr("style")?.let {
+            Regex("url\\([\"']?(.*?)['\"]?\\)").find(it)?.groupValues?.get(1)
+        } ?: this.attr("style").let { 
+            Regex("url\\([\"']?(.*?)['\"]?\\)").find(it)?.groupValues?.get(1)
+        } ?: imgEl?.attr("data-webp")
+          ?: imgEl?.attr("data-src")
+          ?: imgEl?.attr("data-original")
+          ?: imgEl?.attr("data-thumb")
+          ?: imgEl?.attr("src")
+
+        // 2. Placeholder Interception Strategy: If it matches the style canvas, rewrite it or clear it
+        if (poster != null && (poster.contains("style-853x480.png") || poster.contains("assets/img"))) {
+            // Attempt extraction from video ID reference if parent structure is hidden
+            val videoId = Regex("""id=(\d+)""").find(href)?.groupValues?.get(1)
+            poster = if (videoId != null) {
+                "https://pinaycumvid.xyz/contents/videos_screenshots/${videoId.toInt() / 1000 * 1000}/$videoId/preview.mp4.jpg"
+            } else {
+                null
             }
-            ?: this.attr("style").let { 
-                Regex("url\\([\"']?(.*?)['\"]?\\)").find(it)?.groupValues?.get(1)
-            }
-            ?: attr("data-poster")
+        }
 
         if (poster != null) {
+            if (poster.startsWith("//")) {
+                poster = "https:$poster"
+            }
             poster = fixUrl(poster)
         }
 
