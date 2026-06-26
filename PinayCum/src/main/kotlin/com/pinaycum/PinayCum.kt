@@ -81,49 +81,85 @@ class PinayCum : MainAPI() {
         val document = app.get(data, referer = mainUrl).document
         var found = false
 
-        // 1. Extract standard player server buttons
+        // 1. Process standard player server buttons explicitly
         document.select("a.btn-dark[href*='&s=']").forEach { playerBtn ->
             val playerUrl = fixUrl(playerBtn.attr("href"))
+            val btnName = playerBtn.text().trim()
 
             try {
                 val playerDoc = app.get(playerUrl, referer = data).document
 
-                // Check for standard iframes (Handles Lulustream, Doodstream, Streamruby, etc.)
-                playerDoc.select("iframe").forEach { iframe ->
-                    val iframeSrc = fixUrlNull(iframe.attr("src"))
-                    if (iframeSrc != null) {
-                        val loaded = loadExtractor(iframeSrc, playerUrl, subtitleCallback, callback)
-                        if (loaded) found = true
-                    }
-                }
+                // Gather structural frame links from the video sub-page
+                val URLs = playerDoc.select("iframe").mapNotNull { it.attr("src") } +
+                           playerDoc.select("a").mapNotNull { it.attr("href") } +
+                           playerDoc.select("source").mapNotNull { it.attr("src") }
 
-                // Look for direct mp4 fallback
-                playerDoc.select("source[src*='.mp4'], a[href*='.mp4']").forEach { el ->
-                    val src = fixUrlNull(el.attr("src") ?: el.attr("href"))
-                    if (src != null) {
+                URLs.distinct().forEach { rawUrl ->
+                    val cleanUrl = fixUrlNull(rawUrl) ?: return@forEach
+
+                    // --- STREAMRUBY PARSER ---
+                    if (cleanUrl.contains("ruby") || cleanUrl.contains("streamruby")) {
+                        try {
+                            val rubyResponse = app.get(cleanUrl, referer = playerUrl).text
+                            val streamUrlRegex = Regex("""["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""")
+                            val directStreamUrl = streamUrlRegex.find(rubyResponse)?.groupValues?.get(1)
+
+                            if (directStreamUrl != null) {
+                                val isM3u8 = directStreamUrl.contains(".m3u8")
+                                callback(
+                                    newExtractorLink(
+                                        source = "StreamRuby",
+                                        name = "$btnName (StreamRuby)",
+                                        url = directStreamUrl,
+                                        type = if (isM3u8) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO,
+                                        referer = cleanUrl
+                                    )
+                                )
+                                found = true
+                            }
+                        } catch (_: Exception) {}
+                    }
+
+                    // --- DOODSTREAM PARSER ---
+                    else if (cleanUrl.contains("dood") || cleanUrl.contains("ds2play")) {
+                        val embedUrl = cleanUrl.replace("/d/", "/e/").replace("/f/", "/e/")
                         callback(
                             newExtractorLink(
-                                source = name,
-                                name = "${playerBtn.text().trim()} Direct",
-                                url = src,
-                                type = ExtractorLinkType.VIDEO
+                                source = "DoodStream",
+                                name = "$btnName (DoodStream)",
+                                url = embedUrl,
+                                type = ExtractorLinkType.VIDEO,
+                                referer = "$mainUrl/"
                             )
                         )
                         found = true
+                    }
+
+                    // --- LULUSTREAM PARSER ---
+                    else if (cleanUrl.contains("lulu")) {
+                        callback(
+                            newExtractorLink(
+                                source = "LuluStream",
+                                name = "$btnName (LuluStream)",
+                                url = cleanUrl,
+                                type = ExtractorLinkType.VIDEO,
+                                referer = "$mainUrl/"
+                            )
+                        )
+                        found = true
+                    }
+                    
+                    // --- GENERIC EXTRACTION FALLBACK ---
+                    else {
+                        if (loadExtractor(cleanUrl, playerUrl, subtitleCallback, callback)) {
+                            found = true
+                        }
                     }
                 }
             } catch (_: Exception) {}
         }
 
-        // 2. Global Page Scan: Catch loose iframes printed directly on the page
-        document.select("iframe").forEach { iframe ->
-            val src = fixUrlNull(iframe.attr("src"))
-            if (src != null) {
-                if (loadExtractor(src, data, subtitleCallback, callback)) found = true
-            }
-        }
-
-        // 3. Vidaara Direct Fix Block
+        // 2. Vidara Direct Fix Block
         Regex("""https?://vidaarax\.net/e/[\w-]+""").find(document.toString())?.value?.let { embedUrl ->
             try {
                 val embedDoc = app.get(embedUrl, referer = mainUrl).text
@@ -135,7 +171,7 @@ class PinayCum : MainAPI() {
                     callback(
                         newExtractorLink(
                             source = name,
-                            name = "Vidara Direct (Fixed)",
+                            name = "Vidara Direct",
                             url = streamUrl,
                             type = if (isM3u8) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO
                         )
