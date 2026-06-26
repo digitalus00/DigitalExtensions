@@ -72,7 +72,7 @@ class PinayCum : MainAPI() {
         }
     }
 
-    override suspend fun loadLinks(
+override suspend fun loadLinks(
         data: String,
         isCdn: Boolean,
         subtitleCallback: (SubtitleFile) -> Unit,
@@ -81,27 +81,24 @@ class PinayCum : MainAPI() {
         val document = app.get(data, referer = mainUrl).document
         var found = false
 
-        // Extract player buttons
+        // 1. Core Extension: Extract standard player server buttons
         document.select("a.btn-dark[href*='&s=']").forEach { playerBtn ->
             val playerUrl = fixUrl(playerBtn.attr("href"))
 
             try {
                 val playerDoc = app.get(playerUrl, referer = data).document
 
-                // Look for iframe
-                playerDoc.selectFirst("iframe")?.attr("src")?.let { iframeSrc ->
-                    callback(
-                        newExtractorLink(
-                            source = name,
-                            name = playerBtn.text().trim(),
-                            url = iframeSrc,
-                            type = ExtractorLinkType.VIDEO
-                        )
-                    )
-                    found = true
+                // Check for standard iframes (This handles many generic third-party hosts)
+                playerDoc.select("iframe").forEach { iframe ->
+                    val iframeSrc = fixUrlNull(iframe.attr("src"))
+                    if (iframeSrc != null) {
+                        // loadExtractor automatically recognizes Lulustream, Doodstream, Streamruby, etc.
+                        val loaded = loadExtractor(iframeSrc, playerUrl, subtitleCallback, callback)
+                        if (loaded) found = true
+                    }
                 }
 
-                // Look for direct mp4
+                // Look for direct mp4 fallback
                 playerDoc.select("source[src*='.mp4'], a[href*='.mp4']").forEach { el ->
                     val src = fixUrlNull(el.attr("src") ?: el.attr("href"))
                     if (src != null) {
@@ -119,7 +116,15 @@ class PinayCum : MainAPI() {
             } catch (_: Exception) {}
         }
 
-        // Vidaara Direct Fix Block
+        // 2. Global Page Scan: Catch any loose iframes or raw host links printed on the page
+        document.select("iframe").forEach { iframe ->
+            val src = fixUrlNull(iframe.attr("src"))
+            if (src != null) {
+                if (loadExtractor(src, data, subtitleCallback, callback)) found = true
+            }
+        }
+
+        // 3. Vidaara Direct Fix Block (Kept from your original code)
         Regex("""https?://vidaarax\.net/e/[\w-]+""").find(document.toString())?.value?.let { embedUrl ->
             try {
                 val embedDoc = app.get(embedUrl, referer = mainUrl).text
@@ -138,13 +143,12 @@ class PinayCum : MainAPI() {
                     )
                     found = true
                 } else {
-                    found = loadExtractor(embedUrl, mainUrl, subtitleCallback, callback)
+                    if (loadExtractor(embedUrl, mainUrl, subtitleCallback, callback)) found = true
                 }
             } catch (e: Exception) {
-                found = loadExtractor(embedUrl, mainUrl, subtitleCallback, callback)
+                if (loadExtractor(embedUrl, mainUrl, subtitleCallback, callback)) found = true
             }
         }
 
         return found
     }
-}
