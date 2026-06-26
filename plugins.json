@@ -9,7 +9,7 @@
             "Grok"
         ],
         "description": "PinayCum.tv - Filipino / Pinay adult videos",
-        "fileSize": 20872,
+        "fileSize": 21534,
         "repositoryUrl": "https://github.com/stutra-ai/pinayctv",
         "language": "tl",
         "tvTypes": [
@@ -17,6 +17,6 @@
         ],
         "iconUrl": "https://pinaycum.tv/favicon.ico",
         "apiVersion": 1,
-        "fileHash": "sha256-70a06ab78580f0246369a6eb9d90cd9f22a57127367e29c708734d093d6f7943"
+        "fileHash": "sha256-46d0dfc4c2f96f3f6862cf0dcaeb5f20c8c22b307cd652c388945f3ceecfc82a"
     }
 ]
