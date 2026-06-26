@@ -87,33 +87,11 @@ class PinayCum : MainAPI() {
         var found = false
         val processedUrls = mutableSetOf<String>()
 
-        // 1. WEBVIEW RADAR SWEEP (Bypasses Cloudflare / Anti-Bot blocks completely)
-        // This launches the landing page via a hidden browser sandbox to sniff out loaded resources
-        val interceptedUrls = mutableListOf<String>()
-        
-        try {
-            // We use standard CloudStream network intercepts to catch video requests inside the WebView
-            val webViewResponse = wvMode?.let { mode ->
-                // Custom JS injection to trigger hidden player button frames instantly inside the background page execution
-                val interceptJs = """
-                    try {
-                        document.querySelectorAll("a.btn-dark[href*='&s=']").forEach(el => el.click());
-                    } catch(e) {}
-                """.trimIndent()
-                
-                // Load page through WebView engine
-                // Update implementation depending on the framework build versions
-            }
-        } catch (_: Exception) {}
-
-        // 2. FALLBACK STABLE METHOD: Fetch the static raw text manually if WebView intercept fails
         val res = try { app.get(data, headers = defHeaders, referer = mainUrl) } catch(e: Exception) { null }
         val pageHtml = res?.text ?: ""
         val document = res?.document
 
-        // === EXTRACT PIPELINE ===
-        
-        // StreamRuby Processing
+        // 1. Text Sweep StreamRuby Extraction
         Regex("""https?://(?:streamruby|rubystream|rubyembed|rubystr|struby|streamr)[^\s"'><]+""").findAll(pageHtml).forEach { match ->
             val cleanUrl = match.value
             if (processedUrls.add(cleanUrl)) {
@@ -127,7 +105,7 @@ class PinayCum : MainAPI() {
             }
         }
 
-        // DoodStream Processing
+        // 2. Direct Fallback Sweep for Primary Hosts (Dood / Lulu)
         Regex("""https?://(?:doodstream\.com|dood\.[^\s"'><]+|ds2play\.[^\s"'><]+)/[efd]/[a-zA-Z0-9]+""").findAll(pageHtml).forEach { match ->
             val embedUrl = match.value.replace("/d/", "/e/").replace("/f/", "/e/")
             if (processedUrls.add(embedUrl)) {
@@ -136,7 +114,6 @@ class PinayCum : MainAPI() {
             }
         }
 
-        // LuluStream Processing
         Regex("""https?://(?:lulustream|lulu)[^\s"'><]+""").findAll(pageHtml).forEach { match ->
             val luluUrl = match.value
             if (processedUrls.add(luluUrl)) {
@@ -145,7 +122,7 @@ class PinayCum : MainAPI() {
             }
         }
 
-        // Vidara Processing
+        // 3. Vidara Extraction Sweep
         Regex("""https?://(?:vidaara|vidaarax)[\w-]*\.[a-z]+/e/[\w-]+""").findAll(pageHtml).forEach { match ->
             val embedUrl = match.value
             if (processedUrls.add(embedUrl)) {
@@ -159,9 +136,9 @@ class PinayCum : MainAPI() {
             }
         }
 
-        // 3. Last Ditch Structural Fallback: Parse explicit HTML button fragments
+        // 4. Structural Verification of External Source Redirect Targets
         if (document != null) {
-            val playerButtons = document.select("a.btn-dark[href*='&s=']")
+            val playerButtons = document.select("a.btn-dark[href*='&s='], a.btn-primary[href*='&s=']")
             for (playerBtn in playerButtons) {
                 val playerUrl = fixUrl(playerBtn.attr("href"))
                 val btnName = playerBtn.text().trim()
