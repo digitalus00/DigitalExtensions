@@ -39,7 +39,9 @@ class PinayCum : MainAPI() {
                 Regex("url\\([\"']?(.*?)['\"]?\\)").find(it)?.groupValues?.get(1)
             }
 
-        if (poster != null) poster = fixUrl(poster)
+        if (poster != null) {
+            poster = fixUrl(poster)
+        }
 
         return newMovieSearchResponse(title, href, TvType.NSFW) {
             this.posterUrl = poster
@@ -55,7 +57,9 @@ class PinayCum : MainAPI() {
                 Regex("url\\([\"']?(.*?)['\"]?\\)").find(it)?.groupValues?.get(1)
             }
 
-        if (poster != null) poster = fixUrl(poster)
+        if (poster != null) {
+            poster = fixUrl(poster)
+        }
 
         val description = document.selectFirst("meta[property=og:description]")?.attr("content")
 
@@ -91,17 +95,17 @@ class PinayCum : MainAPI() {
                     found = true
                 }
 
-                // direct links
-                playerDoc.select("source[src*='.mp4'], source[src*='.m3u8'], a[href*='.mp4']").forEach { el ->
+                // direct mp4
+                playerDoc.select("source[src*='.mp4'], a[href*='.mp4']").forEach { el ->
                     val src = fixUrlNull(el.attr("src") ?: el.attr("href"))
                     if (src != null) {
                         callback(
-                            newExtractorLink(
-                                source = name,
-                                name = playerName,
-                                url = src,
-                                referer = playerUrl,
-                                quality = Qualities.Unknown.value
+                            ExtractorLink(
+                                name,
+                                playerName,
+                                src,
+                                playerUrl,
+                                Qualities.Unknown.value
                             )
                         )
                         found = true
@@ -110,7 +114,7 @@ class PinayCum : MainAPI() {
             } catch (_: Exception) {}
         }
 
-        // Vidaara Direct Embed
+        // Vidaara Direct
         Regex("""https?://vidaarax\.net/e/[\w-]+""").find(document.toString())?.value?.let { embedUrl ->
             loadExtractor(embedUrl, data, subtitleCallback, callback)
             found = true
