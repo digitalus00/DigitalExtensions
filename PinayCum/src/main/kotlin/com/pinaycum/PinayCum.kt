@@ -50,13 +50,15 @@ class PinayCum : MainAPI() {
         val anchor = if (this.tagName() == "a") this else this.selectFirst("a[href*='watch.php?id=']")
         val href = fixUrlNull(anchor?.attr("href")) ?: return null
         
-        val title = selectFirst("h6.vid-title strong, .vid-title, strong, h3, h4, .title")?.text()?.trim() 
-            ?: anchor?.text()?.trim() 
-            ?: return null
+        // Clean up title extraction logic to skip metadata/years
+        var title = selectFirst("h6.vid-title strong, .vid-title, strong, h3, h4, .title")?.text()?.trim()
+        if (title.isNullOrEmpty() || title.matches(Regex("""\d{4}.*"""))) {
+            title = anchor?.text()?.trim()
+        }
+        if (title.isNullOrEmpty()) return null
 
         val imgEl = selectFirst("img")
         
-        // 1. Core structural background scanner (overrides blank image placeholder tags)
         var poster = selectFirst("[style*='background']")?.attr("style")?.let {
             Regex("url\\([\"']?(.*?)['\"]?\\)").find(it)?.groupValues?.get(1)
         } ?: this.attr("style").let { 
@@ -67,9 +69,7 @@ class PinayCum : MainAPI() {
           ?: imgEl?.attr("data-thumb")
           ?: imgEl?.attr("src")
 
-        // 2. Placeholder Interception Strategy: If it matches the style canvas, rewrite it or clear it
         if (poster != null && (poster.contains("style-853x480.png") || poster.contains("assets/img"))) {
-            // Attempt extraction from video ID reference if parent structure is hidden
             val videoId = Regex("""id=(\d+)""").find(href)?.groupValues?.get(1)
             poster = if (videoId != null) {
                 "https://pinaycumvid.xyz/contents/videos_screenshots/${videoId.toInt() / 1000 * 1000}/$videoId/preview.mp4.jpg"
@@ -105,7 +105,12 @@ class PinayCum : MainAPI() {
         }
 
         val description = document.selectFirst("meta[property=og:description]")?.attr("content")
-        val recommendations = document.select("a[href*='watch.php?id=']").mapNotNull { it.toSearchResult() }
+        
+        // Dynamic Recommendation Parser Strategy (Bypasses parent block duplicate bugs)
+        val recommendations = document.select("a[href*='watch.php?id=']").filter { element ->
+            // Exclude main elements and player controls to filter layout noise
+            !element.hasClass("btn") && element.selectFirst("img") != null
+        }.mapNotNull { it.toSearchResult() }.distinctBy { it.url }
 
         return newMovieLoadResponse(title, url, TvType.NSFW, url) {
             this.posterUrl = poster
