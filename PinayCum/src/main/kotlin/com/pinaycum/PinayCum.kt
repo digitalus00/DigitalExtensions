@@ -39,9 +39,7 @@ class PinayCum : MainAPI() {
                 Regex("url\\([\"']?(.*?)['\"]?\\)").find(it)?.groupValues?.get(1)
             }
 
-        if (poster != null) {
-            poster = fixUrl(poster)
-        }
+        if (poster != null) poster = fixUrl(poster)
 
         return newMovieSearchResponse(title, href, TvType.NSFW) {
             this.posterUrl = poster
@@ -57,9 +55,7 @@ class PinayCum : MainAPI() {
                 Regex("url\\([\"']?(.*?)['\"]?\\)").find(it)?.groupValues?.get(1)
             }
 
-        if (poster != null) {
-            poster = fixUrl(poster)
-        }
+        if (poster != null) poster = fixUrl(poster)
 
         val description = document.selectFirst("meta[property=og:description]")?.attr("content")
 
@@ -100,12 +96,12 @@ class PinayCum : MainAPI() {
                     val src = fixUrlNull(el.attr("src") ?: el.attr("href"))
                     if (src != null) {
                         callback(
-                            ExtractorLink(
-                                name,
-                                playerName,
-                                src,
-                                playerUrl,
-                                Qualities.Unknown.value
+                            newExtractorLink(
+                                source = name,
+                                name = playerName,
+                                url = src,
+                                referer = playerUrl,
+                                quality = Qualities.Unknown.value
                             )
                         )
                         found = true
