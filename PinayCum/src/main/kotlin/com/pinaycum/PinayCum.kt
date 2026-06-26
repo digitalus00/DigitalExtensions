@@ -81,21 +81,23 @@ class PinayCum : MainAPI() {
         val document = app.get(data, referer = mainUrl).document
         var found = false
 
-        // 1. Process standard player server buttons explicitly
-        document.select("a.btn-dark[href*='&s=']").forEach { playerBtn ->
+        // 1. Process standard player server buttons explicitly using clean iterative loops
+        val playerButtons = document.select("a.btn-dark[href*='&s=']")
+        for (playerBtn in playerButtons) {
             val playerUrl = fixUrl(playerBtn.attr("href"))
             val btnName = playerBtn.text().trim()
 
             try {
                 val playerDoc = app.get(playerUrl, referer = data).document
 
-                // Gather structural frame links from the video sub-page
-                val URLs = playerDoc.select("iframe").mapNotNull { it.attr("src") } +
-                           playerDoc.select("a").mapNotNull { it.attr("href") } +
-                           playerDoc.select("source").mapNotNull { it.attr("src") }
+                // Gather structural frame links safely
+                val collectedUrls = mutableListOf<String>()
+                playerDoc.select("iframe").forEach { el -> el.attr("src").takeIf { it.isNotEmpty() }?.let { collectedUrls.add(it) } }
+                playerDoc.select("a").forEach { el -> el.attr("href").takeIf { it.isNotEmpty() }?.let { collectedUrls.add(it) } }
+                playerDoc.select("source").forEach { el -> el.attr("src").takeIf { it.isNotEmpty() }?.let { collectedUrls.add(it) } }
 
-                URLs.distinct().forEach { rawUrl ->
-                    val cleanUrl = fixUrlNull(rawUrl) ?: return@forEach
+                for (rawUrl in collectedUrls.distinct()) {
+                    val cleanUrl = fixUrlNull(rawUrl) ?: continue
 
                     // --- STREAMRUBY PARSER ---
                     if (cleanUrl.contains("ruby") || cleanUrl.contains("streamruby")) {
@@ -111,8 +113,7 @@ class PinayCum : MainAPI() {
                                         source = "StreamRuby",
                                         name = "$btnName (StreamRuby)",
                                         url = directStreamUrl,
-                                        type = if (isM3u8) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO,
-                                        referer = cleanUrl
+                                        type = if (isM3u8) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO
                                     )
                                 )
                                 found = true
@@ -128,8 +129,7 @@ class PinayCum : MainAPI() {
                                 source = "DoodStream",
                                 name = "$btnName (DoodStream)",
                                 url = embedUrl,
-                                type = ExtractorLinkType.VIDEO,
-                                referer = "$mainUrl/"
+                                type = ExtractorLinkType.VIDEO
                             )
                         )
                         found = true
@@ -142,8 +142,7 @@ class PinayCum : MainAPI() {
                                 source = "LuluStream",
                                 name = "$btnName (LuluStream)",
                                 url = cleanUrl,
-                                type = ExtractorLinkType.VIDEO,
-                                referer = "$mainUrl/"
+                                type = ExtractorLinkType.VIDEO
                             )
                         )
                         found = true
