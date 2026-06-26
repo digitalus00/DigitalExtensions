@@ -72,7 +72,7 @@ class PinayCum : MainAPI() {
         }
     }
 
-override suspend fun loadLinks(
+    override suspend fun loadLinks(
         data: String,
         isCdn: Boolean,
         subtitleCallback: (SubtitleFile) -> Unit,
@@ -81,18 +81,17 @@ override suspend fun loadLinks(
         val document = app.get(data, referer = mainUrl).document
         var found = false
 
-        // 1. Core Extension: Extract standard player server buttons
+        // 1. Extract standard player server buttons
         document.select("a.btn-dark[href*='&s=']").forEach { playerBtn ->
             val playerUrl = fixUrl(playerBtn.attr("href"))
 
             try {
                 val playerDoc = app.get(playerUrl, referer = data).document
 
-                // Check for standard iframes (This handles many generic third-party hosts)
+                // Check for standard iframes (Handles Lulustream, Doodstream, Streamruby, etc.)
                 playerDoc.select("iframe").forEach { iframe ->
                     val iframeSrc = fixUrlNull(iframe.attr("src"))
                     if (iframeSrc != null) {
-                        // loadExtractor automatically recognizes Lulustream, Doodstream, Streamruby, etc.
                         val loaded = loadExtractor(iframeSrc, playerUrl, subtitleCallback, callback)
                         if (loaded) found = true
                     }
@@ -116,7 +115,7 @@ override suspend fun loadLinks(
             } catch (_: Exception) {}
         }
 
-        // 2. Global Page Scan: Catch any loose iframes or raw host links printed on the page
+        // 2. Global Page Scan: Catch loose iframes printed directly on the page
         document.select("iframe").forEach { iframe ->
             val src = fixUrlNull(iframe.attr("src"))
             if (src != null) {
@@ -124,7 +123,7 @@ override suspend fun loadLinks(
             }
         }
 
-        // 3. Vidaara Direct Fix Block (Kept from your original code)
+        // 3. Vidaara Direct Fix Block
         Regex("""https?://vidaarax\.net/e/[\w-]+""").find(document.toString())?.value?.let { embedUrl ->
             try {
                 val embedDoc = app.get(embedUrl, referer = mainUrl).text
@@ -152,3 +151,4 @@ override suspend fun loadLinks(
 
         return found
     }
+}
