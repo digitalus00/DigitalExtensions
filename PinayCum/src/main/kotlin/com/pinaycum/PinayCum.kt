@@ -34,8 +34,6 @@ class PinayCum : MainAPI() {
         val title = selectFirst("h6.vid-title strong, .vid-title, strong")?.text()?.trim() ?: return null
         val href = fixUrlNull(attr("href")) ?: return null
 
-        // Better poster extraction for homepage
-        // Poster extraction
         var poster = selectFirst("img")?.attr("src")
             ?: selectFirst("div[style*='background']")?.attr("style")?.let {
                 Regex("url\\([\"']?(.*?)['\"]?\\)").find(it)?.groupValues?.get(1)
@@ -43,12 +41,12 @@ class PinayCum : MainAPI() {
 
         if (poster?.startsWith("00IMG/") == true) {
             poster = fixUrl(poster, mainUrl)
+        }
         if (poster != null) {
-            poster = fixUrl(poster)
+            poster = fixUrl(poster, mainUrl)
         }
 
         return newMovieSearchResponse(title, href, TvType.NSFW) {
-            this.posterUrl = fixUrlNull(poster)
             this.posterUrl = poster
         }
     }
@@ -57,8 +55,6 @@ class PinayCum : MainAPI() {
         val document = app.get(url, referer = mainUrl).document
         val title = document.selectFirst("h4, h1, title")?.text()?.trim() ?: "Pinay Video"
 
-        // Better poster extraction on watch page
-        // Better poster
         var poster = document.selectFirst("meta[property=og:image]")?.attr("content")
             ?: document.selectFirst("div#preroll-overlay")?.attr("style")?.let {
                 Regex("url\\([\"']?(.*?)['\"]?\\)").find(it)?.groupValues?.get(1)
@@ -67,97 +63,97 @@ class PinayCum : MainAPI() {
 
         if (poster?.startsWith("00IMG/") == true) {
             poster = fixUrl(poster, mainUrl)
+        }
         if (poster != null) {
-            poster = fixUrl(poster)
+            poster = fixUrl(poster, mainUrl)
         }
 
         val description = document.selectFirst("meta[property=og:description]")?.attr("content")
-
         val recommendations = document.select("a[href*='watch.php?id=']").mapNotNull { it.toSearchResult() }
 
         return newMovieLoadResponse(title, url, TvType.NSFW, url) {
-            this.posterUrl = fixUrlNull(poster)
             this.posterUrl = poster
             this.plot = description
             this.recommendations = recommendations
         }
-@@ -84,17 +84,16 @@
+    }
+
+    override suspend fun loadLinks(
+        data: String,
+        isCdn: Boolean,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
+    ): Boolean {
         val document = app.get(data, referer = mainUrl).document
         var found = false
 
-        // Extract all player buttons
-        // Player buttons (Player 1, Player 2, etc.)
+        // Extract player buttons
         document.select("a.btn-dark[href*='&s=']").forEach { playerBtn ->
-            val playerUrl = fixUrl(playerBtn.attr("href"))
-            val playerText = playerBtn.text().trim()
+            val playerUrl = fixUrl(playerBtn.attr("href"), mainUrl)
 
             try {
                 val playerDoc = app.get(playerUrl, referer = data).document
 
                 // Look for iframe
-                val iframeSrc = playerDoc.selectFirst("iframe")?.attr("src")
-                if (iframeSrc != null) {
-                // iframe
                 playerDoc.selectFirst("iframe")?.attr("src")?.let { iframeSrc ->
                     callback(
-                        ExtractorLink(
+                        newExtractorLink(
                             source = name,
-@@ -108,9 +107,9 @@
+                            name = playerBtn.text().trim(),
+                            url = iframeSrc,
+                            referer = playerUrl,
+                            quality = Qualities.Unknown.value,
+                            type = ExtractorLinkType.VIDEO
+                        )
+                    )
                     found = true
                 }
 
                 // Look for direct mp4
-                playerDoc.select("source[src*='.mp4'], a[href*='.mp4']").forEach { srcEl ->
-                    val src = fixUrlNull(srcEl.attr("src") ?: srcEl.attr("href"))
-                // direct mp4
                 playerDoc.select("source[src*='.mp4'], a[href*='.mp4']").forEach { el ->
                     val src = fixUrlNull(el.attr("src") ?: el.attr("href"))
                     if (src != null) {
                         callback(
-                            ExtractorLink(
-@@ -125,25 +124,23 @@
+                            newExtractorLink(
+                                source = name,
+                                name = "${playerBtn.text().trim()} Direct",
+                                url = src,
+                                referer = playerUrl,
+                                quality = Qualities.Unknown.value,
+                                type = ExtractorLinkType.VIDEO
+                            )
+                        )
                         found = true
                     }
                 }
-            } catch (e: Exception) {
-                // Ignore failed player
-            }
             } catch (_: Exception) {}
         }
 
-        // Direct Vidaara / Vidara extraction (most reliable)
-        // Vidaara Direct (most important source)
-        // Vidaara Direct Fix
+        // Vidaara Direct Fix Block
         Regex("""https?://vidaarax\.net/e/[\w-]+""").find(document.toString())?.value?.let { embedUrl ->
             try {
-                // 1. Fetch the actual embed HTML page
                 val embedDoc = app.get(embedUrl, referer = mainUrl).text
-                
-                // 2. Extract the hidden streaming file URL (often bundled in javascript)
-                // This regex seeks typical master.m3u8, index.m3u8, or direct file matches inside scripts
                 val streamUrlRegex = Regex("""["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""")
                 val streamUrl = streamUrlRegex.find(embedDoc)?.groupValues?.get(1)
 
                 if (streamUrl != null) {
                     val isM3u8 = streamUrl.contains(".m3u8")
                     callback(
-                        ExtractorLink(
+                        newExtractorLink(
                             source = name,
                             name = "Vidara Direct (Fixed)",
                             url = streamUrl,
-                            referer = embedUrl, // The embed page acts as the referer here
+                            referer = embedUrl,
                             quality = Qualities.Unknown.value,
                             type = if (isM3u8) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO
                         )
                     )
                     found = true
                 } else {
-                    // Fallback: If direct stream extraction fails, try using native extractors
-                    found = loadExtractor(embedUrl, mainUrl, callback)
+                    found = loadExtractor(embedUrl, mainUrl, subtitleCallback, callback)
                 }
             } catch (e: Exception) {
-                // Log or handle failed network call gracefully
-                found = loadExtractor(embedUrl, mainUrl, callback)
+                found = loadExtractor(embedUrl, mainUrl, subtitleCallback, callback)
             }
         }
 
