@@ -58,5 +58,25 @@
         "description": "Live TV",
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/GdlLiveTv.cs3",
         "name": "Glt Live Tv"
-    }
+    },
+    {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/DesiKahaniya.cs3",
+        "status": 1,
+        "version": 1,
+        "name": "Desi Kahnaiya",
+        "internalName": "Desi Kahaniya",
+        "authors": [
+            "Digital"
+        ],
+        "description": "Desi Videos",
+        "fileSize": 19218,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "hi",
+        "tvTypes": [
+            "NSFW"
+        ],
+        "iconUrl": "https://pinaycum.tv/favicon.ico",
+        "apiVersion": 1,
+        "fileHash": "sha256-e962dfea157b9d7742e6e662588faf704b5fd6b571b3c032d2502022cc5423c2"
+    },
 ]
