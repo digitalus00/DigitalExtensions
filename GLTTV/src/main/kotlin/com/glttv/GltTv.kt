@@ -40,18 +40,20 @@ class GdlCinemaProvider : MainAPI() {
 
         val items: List<TmdbItem> = when {
             path.startsWith("/trending/movie") ->
-                tmdbGet("$tmdbBase$path", page)
+                safeAsync<List<TmdbItem>> { tmdbGet("$tmdbBase$path", page) } ?: emptyList()
             path.startsWith("/trending/tv") ->
-                tmdbGet("$tmdbBase$path", page)
+                safeAsync<List<TmdbItem>> { tmdbGet("$tmdbBase$path", page) } ?: emptyList()
             path.startsWith("/movie/") ->
-                tmdbGet("$tmdbBase$path", page)
+                safeAsync<List<TmdbItem>> { tmdbGet("$tmdbBase$path", page) } ?: emptyList()
             path.startsWith("/tv/") ->
-                tmdbGet("$tmdbBase$path", page)
+                safeAsync<List<TmdbItem>> { tmdbGet("$tmdbBase$path", page) } ?: emptyList()
             path.startsWith("/discover/hindi") ->
-                tmdbGet("$tmdbBase/discover/movie", page, mapOf(
-                    "with_original_language" to "hi",
-                    "sort_by" to "popularity.desc"
-                ))
+                safeAsync<List<TmdbItem>> {
+                    tmdbGet("$tmdbBase/discover/movie", page, mapOf(
+                        "with_original_language" to "hi",
+                        "sort_by" to "popularity.desc"
+                    ))
+                } ?: emptyList()
             else -> emptyList()
         }
 
@@ -70,9 +72,11 @@ class GdlCinemaProvider : MainAPI() {
     override suspend fun search(query: String): List<SearchResponse> {
         ensureConfig()
         val movies: List<TmdbItem> =
-            tmdbGet("$tmdbBase/search/movie", 1, mapOf("query" to query))
+            safeAsync<List<TmdbItem>> { tmdbGet("$tmdbBase/search/movie", 1, mapOf("query" to query)) }
+                ?: emptyList()
         val shows: List<TmdbItem> =
-            tmdbGet("$tmdbBase/search/tv", 1, mapOf("query" to query))
+            safeAsync<List<TmdbItem>> { tmdbGet("$tmdbBase/search/tv", 1, mapOf("query" to query)) }
+                ?: emptyList()
 
         return movies.map { it.toSearchResponse("movie") } +
                 shows.map { it.toSearchResponse("tv") }
@@ -105,7 +109,8 @@ class GdlCinemaProvider : MainAPI() {
         val runtime  = detail.runtime ?: detail.episodeRunTime?.firstOrNull()
         val tags     = detail.genres?.mapNotNull { it.name }
 
-        val score: Score? = detail.voteAverage?.let { Score.from10(it) }
+        // TMDB's vote_average is already 0–10, Score.from10 takes it directly
+        val score: Score? = Score.from10(detail.voteAverage)
 
         // Trailer
         val trailerKey = detail.videos?.results
@@ -440,7 +445,6 @@ class GdlCinemaProvider : MainAPI() {
         @JsonProperty("title") val title: String? = null
     )
 
-    // FIXED: Concrete class instead of generic to avoid type erasure
     data class TmdbPaginatedItems(
         @JsonProperty("results")     val results: List<TmdbItem> = emptyList(),
         @JsonProperty("page")        val page: Int = 1,
