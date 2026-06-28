@@ -3,7 +3,7 @@ plugins {
     id("com.lagradost.cloudstream3.gradle") // Use the template's current version
 }
 
-version = 1
+version = 2
 
 cloudstream {
     authors     = listOf("Digital")
