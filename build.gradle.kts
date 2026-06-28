@@ -1,9 +1,6 @@
 import com.android.build.api.dsl.LibraryExtension
 import com.lagradost.cloudstream3.gradle.CloudstreamExtension
-import org.gradle.api.plugins.JavaPluginExtension
-import org.gradle.kotlin.dsl.register
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 buildscript {
@@ -12,19 +9,10 @@ buildscript {
         mavenCentral()
         maven("https://jitpack.io")
     }
-
     dependencies {
-        classpath("com.android.tools.build:gradle:9.1.1")
-        classpath("com.github.recloudstream:gradle:81b1d424d2")
+        classpath("com.android.tools.build:gradle:9.0.0")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.21")
-    }
-}
-
-subprojects {
-    tasks.withType<KotlinCompile>().configureEach {
-        compilerOptions {
-            freeCompilerArgs.add("-Xannotation-default-target=param-property")
-        }
+        classpath("com.github.recloudstream:gradle:81b1d424d2")
     }
 }
 
@@ -36,18 +24,11 @@ allprojects {
     }
 }
 
-fun Project.cloudstream(configuration: CloudstreamExtension.() -> Unit) = extensions.getByName<CloudstreamExtension>("cloudstream").configuration()
+fun Project.cloudstream(configuration: CloudstreamExtension.() -> Unit) =
+    extensions.getByName<CloudstreamExtension>("cloudstream").configuration()
 
 fun Project.android(configuration: LibraryExtension.() -> Unit) {
     extensions.getByName<LibraryExtension>("android").apply {
-        project.extensions.findByType(JavaPluginExtension::class.java)?.apply {
-            // Use Java 17 toolchain even if a higher JDK runs the build.
-            // We still use Java 8 for now which higher JDKs have deprecated.
-            toolchain {
-                languageVersion.set(JavaLanguageVersion.of(17))
-            }
-        }
-
         configuration()
     }
 }
@@ -69,15 +50,14 @@ subprojects {
     }
 
     cloudstream {
-        // when running through gitHub workflow, GITHUB_REPOSITORY should contain current repository name
-        setRepo(System.getenv("GITHUB_REPOSITORY") ?: "https://github.com/stutra-ai/pinayctv")
-
-        authors = listOf("digital")
+        setRepo(System.getenv("GITHUB_REPOSITORY") ?: "https://github.com/digitalus00/DigitalExtensions")
+        authors = listOf("Digitalus00")
+        status = 1
+        requiresResources = false
     }
 
-
     android {
-        namespace = "com.kraptor.${project.name.lowercase().replace("-", "_").let { if (it.firstOrNull()?.isDigit() == true) "p$it" else it }}"
+        namespace = "com.Digital.${project.name.lowercase().replace("-", "_").let { if (it.firstOrNull()?.isDigit() == true) "p$it" else it }}"
         compileSdk = 36
 
         defaultConfig {
@@ -95,31 +75,26 @@ subprojects {
     }
 
     dependencies {
-        val cloudstream by configurations
-        val implementation by configurations
+        // CloudStream stubs
+        add("cloudstream", "com.lagradost:cloudstream3:pre-release")
 
-        // Stubs for all Cloudstream classes
-        cloudstream("com.lagradost:cloudstream3:pre-release")
-
-        // these dependencies can include any of those which are added by the app,
-        // but you don't need to include any of them if you don't need them
-        // https://github.com/recloudstream/cloudstream/blob/master/app/build.gradle
-        implementation(kotlin("stdlib"))                                              // Kotlin'in temel kütüphanesi
-        implementation("com.github.Blatzar:NiceHttp:0.4.13")                          // HTTP kütüphanesi
-        implementation("org.jsoup:jsoup:1.22.1")                                      // HTML ayrıştırıcı
-        implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.5")   // Kotlin için Jackson JSON kütüphanesi
-        implementation("com.fasterxml.jackson.core:jackson-databind:2.13.5")          // JSON-nesne dönüştürme kütüphanesi
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")      // Kotlin için asenkron işlemler
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
-        implementation("org.mozilla:rhino:1.9.0")
-        implementation("me.xdrop:fuzzywuzzy:1.4.0")
-        implementation("com.google.code.gson:gson:2.13.2")
-        implementation("app.cash.quickjs:quickjs-android:0.9.2")
-        implementation("com.github.vidstige:jadb:v1.2.1")
+        // All compileOnly — CloudStream already bundles these
+        add("compileOnly", kotlin("stdlib"))
+        add("compileOnly", "com.github.Blatzar:NiceHttp:0.4.13")
+        add("compileOnly", "org.jsoup:jsoup:1.22.1")
+        add("compileOnly", "com.fasterxml.jackson.module:jackson-module-kotlin:2.13.5")
+        add("compileOnly", "com.fasterxml.jackson.core:jackson-databind:2.13.5")
+        add("compileOnly", "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
+        add("compileOnly", "org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+        add("compileOnly", "org.mozilla:rhino:1.9.0")
+        add("compileOnly", "me.xdrop:fuzzywuzzy:1.4.0")
+        add("compileOnly", "com.google.code.gson:gson:2.13.2")
+        add("compileOnly", "app.cash.quickjs:quickjs-android:0.9.2")
+        add("compileOnly", "com.github.vidstige:jadb:v1.2.1")
     }
 }
 
-
+// derle = selective build (only status=1 plugins)
 tasks.register("derle") {
     group = "help"
     doLast {
