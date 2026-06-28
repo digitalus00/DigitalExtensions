@@ -19,24 +19,24 @@
         "apiVersion": 1,
         "fileHash": "sha256-e962dfea157b9d7742e6e662588faf704b5fd6b571b3c032d2502022cc5423c2"
     },
-    {
-        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/GLTTV.cs3",
+     {
+        "iconUrl": "https://i.postimg.cc/FRwFFtyT/logo.png",
+        "apiVersion": 1,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "fileSize": 14757,
         "status": 1,
-        "version": 1,
-        "name": "Glt TV",
-        "internalName": "GTT TV",
+        "language": "en",
         "authors": [
             "Digital"
         ],
-        "description": "Demo for now",
-        "fileSize": 19218,
-        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
-        "language": "en",
         "tvTypes": [
-            "All"
+            "Movie",
+            "TvSeries"
         ],
-        "iconUrl": "https://pinaycum.tv/favicon.ico",
-        "apiVersion": 1,
-        "fileHash": "sha256-e962dfea157b9d7742e6e662588faf704b5fd6b571b3c032d2502022cc5423c2"
+        "version": 1,
+        "internalName": "GTTTV",
+        "description": "Movies & Series",
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/GLTTV.cs3",
+        "name": "Glt Cinema"
     }
 ]
