@@ -1,16 +1,16 @@
 [
     {
-        "url": "https://raw.githubusercontent.com/stutra-ai/pinayctv/builds/PinayCum.cs3",
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/PinayCum.cs3",
         "status": 1,
-        "version": -1,
+        "version": 1,
         "name": "PinayCum",
         "internalName": "PinayCum",
         "authors": [
-            "Grok"
+            "Digital"
         ],
         "description": "PinayCum.tv - Filipino / Pinay adult videos",
         "fileSize": 19218,
-        "repositoryUrl": "https://github.com/stutra-ai/pinayctv",
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
         "language": "tl",
         "tvTypes": [
             "NSFW"
