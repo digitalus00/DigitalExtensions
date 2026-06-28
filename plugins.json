@@ -33,7 +33,7 @@
             "Movie",
             "TvSeries"
         ],
-        "version": 1,
+        "version": 2,
         "internalName": "GTTTV",
         "description": "Movies & Series",
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/GLTTV.cs3",
