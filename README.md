@@ -1,26 +1,20 @@
-# 📺 cs-gizlikeyif
+**⚠️ This is currently under development, dont use it yet if you're not comfortable with constantly merging new changes**
 
-**Kısa kod** = **gizlikeyif**
+# `Cloudstream3 Plugin Repo Template`
 
-**Short Code** = **gizlikeyif**
+Template for a [Cloudstream3](https://github.com/recloudstream) plugin repo
 
-## ❗Uyarı - ❗Disclaimer
+**⚠️ Make sure you check "Include all branches" when using this template**
 
-**Tüm eklentiler 18 yaş ve üzeri kullanıcılar için uygundur.**
 
-**All extensions are intended for users aged 18 and above.**
+## Getting started with writing your first plugin
 
-## 💾 Kurulum
+This template includes 1 example plugin.
 
-1. **[cloudstream/pre-release](https://github.com/recloudstream/cloudstream/releases/tag/pre-release)** _Adresinden güncel APK dosyasını indirip kurun._
-2. **Uygulamanın yüklü olduğu cihazda** _[depoyu otomatik yüklemek için tıklayın](https://kraptor123.github.io/redirect/?r=cloudstreamrepo://raw.githubusercontent.com/Kraptor123/Cs-GizliKeyif/refs/heads/master/repo.json)_
----
-## 💾 Installation
-1. **[cloudstream/pre-release](https://github.com/recloudstream/cloudstream/releases/tag/pre-release)** _Download the latest apk._
-2. **On the device where CloudStream is installed** _[click to install automatically](https://kraptor123.github.io/redirect/?r=cloudstreamrepo://raw.githubusercontent.com/Kraptor123/Cs-GizliKeyif/refs/heads/master/repo.json)_
-
----
-
-<a href="https://github.com/Kraptor123/Cs-GizliKeyif/graphs/contributors?selectedMetric=additions" target="_blank">
-  <img src="https://contrib.rocks/image?repo=Kraptor123/Cs-GizliKeyif" />
-</a>
+1. Open the root build.gradle.kts, read the comments and replace all the placeholders
+2. Familiarize yourself with the project structure. Most files are commented
+3. Build or deploy your first plugin using:
+    - Windows: `.\gradlew.bat ExampleProvider:make` or `.\gradlew.bat ExampleProvider:deployWithAdb`
+    - Linux & Mac: `./gradlew ExampleProvider:make` or `./gradlew ExampleProvider:deployWithAdb`
+      This repository is still in progress and i am learning how things works . Instead of that if you want to install it here is the link
+      https://github.com/digitalus00/Learning/blob/builds/repo.json
