@@ -58,5 +58,25 @@
         "description": "Live TV",
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/GdlLiveTv.cs3",
         "name": "Glt Live Tv"
-    }
+    },
+     {
+        "iconUrl": "https://www.google.com/s2/favicons?domain=desikahani2.net&sz=%size%",
+        "apiVersion": 1,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "fileSize": 14757,
+        "status": 1,
+        "language": "en",
+        "authors": [
+            "Digital"
+        ],
+        "tvTypes": [
+          "NSFW"
+        ],
+        "version": 1,
+        "internalName": "Desi Videos",
+        "description": "Desi Videos",
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/DesiKahaniya.cs3",
+        "name": "Desi Videos"
+    },
+    
 ]
