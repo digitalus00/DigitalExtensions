@@ -38,5 +38,25 @@
         "description": "Movies & Series",
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/GLTTV.cs3",
         "name": "Glt Cinema"
+    },
+    {
+        "iconUrl": "https://i.postimg.cc/FRwFFtyT/logo.png",
+        "apiVersion": 1,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "fileSize": 14757,
+        "status": 1,
+        "language": "en",
+        "authors": [
+            "Digital"
+        ],
+        "tvTypes": [
+            "Movie",
+            "TvSeries"
+        ],
+        "version": 1,
+        "internalName": "GTL Live TV",
+        "description": "Live TV",
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/GdlLiveTv.cs3",
+        "name": "Glt Live Tv"
     }
 ]
