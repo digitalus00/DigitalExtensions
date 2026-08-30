@@ -61,6 +61,8 @@ object StoryReader {
     private fun injectButton(activity: AppCompatActivity, root: View, url: String) {
         val pkg = root.context.packageName
         fun id(name: String) = root.resources.getIdentifier(name, "id", pkg)
+        bindPrimaryReadAction(activity, root, url, ::id)
+
         val tvParent = id("result_play_parent").takeIf { it != 0 }?.let { root.findViewById<LinearLayout>(it) }
         if (tvParent != null && tvParent.findViewWithTag<View>(BUTTON_TAG) == null) {
             val button = readerButton(root.context, true) { open(activity, url) }
@@ -74,6 +76,37 @@ object StoryReader {
             val button = readerButton(root.context, false) { open(activity, url) }
             phoneParent.addView(button)
             showWhenReady(button, url)
+        }
+    }
+
+    private fun bindPrimaryReadAction(
+        activity: AppCompatActivity,
+        root: View,
+        url: String,
+        id: (String) -> Int,
+    ) {
+        val candidates = listOf(
+            "result_play_movie",
+            "result_play_movie_button",
+            "result_play_button",
+            "result_play_series",
+            "result_play_series_button",
+            "result_resume_series_button",
+        )
+
+        candidates.forEach { name ->
+            val viewId = id(name)
+            if (viewId == 0) return@forEach
+            root.findViewById<View>(viewId)?.apply {
+                contentDescription = "Read story"
+                if (this is TextView) text = "Read"
+                setOnClickListener { open(activity, url) }
+            }
+        }
+
+        listOf("result_play_movie_text", "result_play_series_text").forEach { name ->
+            val viewId = id(name)
+            if (viewId != 0) root.findViewById<TextView>(viewId)?.text = "Read"
         }
     }
 
