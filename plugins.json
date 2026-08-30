@@ -1,16 +1,15 @@
 [
-    
   {
-   "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/DesiKahaniya.cs3",
+    "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/DesiKahaniya.cs3",
     "status": 1,
-    "version": 2,
+    "version": 3,
     "name": "DesiKahaniya",
     "internalName": "DesiKahaniya",
     "authors": [
       "Digital"
     ],
     "description": "Hindi and regional Indian adult stories with an in-app reader",
-    "fileSize": 21722,
+    "fileSize": 22836,
     "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
     "language": "hi",
     "tvTypes": [
@@ -18,7 +17,6 @@
     ],
     "iconUrl": "https://www.desikahani2.net/wp-content/uploads/2014/12/dk_logo.png",
     "apiVersion": 1,
-    "fileHash": "sha256-c3ce3f2c62b2be29cbb8f7fbee8ebdf9f81053c6786cdffdaf7e95d3cfb00d2e"
+    "fileHash": "sha256-fbea210148699dd83af3ca7d3b0c98ff2d48f6dad13e9885a41f27238b2446eb"
   }
-    
 ]
