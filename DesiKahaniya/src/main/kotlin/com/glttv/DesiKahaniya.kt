@@ -1,121 +1,75 @@
-package com.desikahani2
+package com.glttv
 
-import org.jsoup.nodes.Element
 import com.lagradost.cloudstream3.*
-import com.lagradost.cloudstream3.utils.*
+import com.lagradost.cloudstream3.utils.ExtractorLink
+import org.jsoup.nodes.Document
+import org.jsoup.nodes.Element
+import java.net.URLEncoder
 
-class Desikahani2 : MainAPI() {
-    override var mainUrl              = "https://www.desikahani2.net"
-    override var name                 = "DesiKahani2"
-    override val hasMainPage          = true
-    override var lang                 = "hi"
-    override val hasDownloadSupport   = true
-    override val hasChromecastSupport = true
-    override val supportedTypes       = setOf(TvType.NSFW)
-    override val vpnStatus            = VPNStatus.MightBeNeeded
+class DesiKahaniya : MainAPI() {
+    override var mainUrl = "https://www.desikahani2.net"
+    override var name = API_NAME
+    override var lang = "hi"
+    override val hasMainPage = true
+    override val hasQuickSearch = true
+    override val supportedTypes = setOf(TvType.NSFW)
 
-    // Homepage rails. Keys are path fragments appended to mainUrl, values are display names.
     override val mainPage = mainPageOf(
-        "/videos"                    to "Latest Videos",
-        "/category/desi-mms"         to "Desi MMS",
-        "/category/desi-bhabhi"      to "Desi Bhabhi",
-        "/category/desi-aunty"       to "Desi Aunty",
-        "/category/college-girls"    to "College Girls",
-        "/category/hindi-audio"      to "Hindi Audio",
-        "/category/sex-scandals"     to "Sex Scandals",
-        "/category/threesome"        to "Threesome"
+        mainUrl to "Latest Stories",
+        "$mainUrl/category/top-collection/" to "Top Collection",
+        "$mainUrl/category/hindi-chudai-kahani/" to "Hindi Stories",
+        "$mainUrl/category/desi-chudai/" to "Desi Stories",
+        "$mainUrl/category/bhabhi-ki-chudai/" to "Bhabhi Stories",
+        "$mainUrl/category/parivar-me-chudai/" to "Family Stories",
+        "$mainUrl/category/pehli-chudai/" to "First Time",
+        "$mainUrl/category/other-languages/" to "Other Languages",
     )
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
-        val path = request.data
-        // WordPress style pagination: /videos/page/2/  or  /category/x/page/2/
-        val url = if (page == 1) "$mainUrl$path/" else "$mainUrl$path/page/$page/"
-        val document = app.get(url).document
-
-        val home = document.select("article, div.item, div.post, li.video-item")
-            .mapNotNull { it.toSearchResult() }
-
+        val doc = getDocument(pagedUrl(request.data, page))
+        val items = doc.select("article.post").mapNotNull { it.toSearchResponse() }
         return newHomePageResponse(
-            list = HomePageList(
-                name = request.name,
-                list = home,
-                isHorizontalImages = true
-            ),
-            hasNext = home.isNotEmpty()
+            request.name,
+            items,
+            hasNext = doc.selectFirst("a.next.page-numbers, a.nextpostslink") != null,
         )
     }
 
-    private fun Element.toSearchResult(): SearchResponse? {
-        // Try multiple anchor patterns – WP themes vary
-        val linkEl = this.selectFirst("h2 a, h3 a, a.title, a.thumb, a[rel=bookmark], a")
-            ?: return null
-        val href = fixUrl(linkEl.attr("href"))
-        if (href.isBlank()) return null
-
-        val title = (linkEl.attr("title").ifBlank { null }
-            ?: linkEl.text().ifBlank { null }
-            ?: this.selectFirst("h2, h3, .title")?.text()
-            ?: "No Title").trim()
-
-        val imgEl = this.selectFirst("img")
-        var posterUrl = imgEl?.attr("data-src")
-        if (posterUrl.isNullOrBlank()) posterUrl = imgEl?.attr("data-lazy-src")
-        if (posterUrl.isNullOrBlank()) posterUrl = imgEl?.attr("src")
-        posterUrl = posterUrl?.let { fixUrlNull(it) }
-
-        return newMovieSearchResponse(title, href, TvType.NSFW) {
-            this.posterUrl = posterUrl
-        }
+    override suspend fun search(query: String, page: Int): SearchResponseList {
+        val encoded = URLEncoder.encode(query, "UTF-8")
+        val url = if (page <= 1) "$mainUrl/?s=$encoded" else "$mainUrl/page/$page/?s=$encoded"
+        val doc = getDocument(url)
+        return newSearchResponseList(
+            doc.select("article.post").mapNotNull { it.toSearchResponse() },
+            hasNext = doc.selectFirst("a.next.page-numbers, a.nextpostslink") != null,
+        )
     }
 
-    override suspend fun search(query: String): List<SearchResponse> {
-        val results = mutableListOf<SearchResponse>()
-        val encoded = query.trim().replace(" ", "+")
-
-        // Paginate WP search a few pages deep
-        for (i in 1..5) {
-            val url = if (i == 1) "$mainUrl/?s=$encoded"
-            else "$mainUrl/page/$i/?s=$encoded"
-            val doc = app.get(url).document
-            val page = doc.select("article, div.item, div.post, li.video-item")
-                .mapNotNull { it.toSearchResult() }
-            if (page.isEmpty()) break
-            // Stop if we’re just looping over the same first-page results
-            if (results.isNotEmpty() && results.last().url == page.last().url) break
-            results.addAll(page)
-        }
-        return results.distinctBy { it.url }
-    }
+    override suspend fun quickSearch(query: String): List<SearchResponse> = search(query, 1).items
 
     override suspend fun load(url: String): LoadResponse {
-        val document = app.get(url).document
+        val doc = getDocument(url)
+        val article = doc.selectFirst("article.post")
+            ?: throw ErrorLoadingException("Story content was not found")
+        val title = article.selectFirst("h1.entry-title")?.text()?.trim()
+            ?: doc.selectFirst("meta[property=og:title]")?.attr("content")?.trim()
+            ?: throw ErrorLoadingException("Story title was not found")
+        val content = article.selectFirst(".entry-content")
+            ?.let(::extractStoryText)
+            ?.takeIf { it.isNotBlank() }
+            ?: throw ErrorLoadingException("Story text was not found")
+        val poster = doc.selectFirst("meta[property=og:image]")?.attr("content")?.takeIf(String::isNotBlank)
+            ?: LOGO_URL
+        val description = doc.selectFirst("meta[property=og:description]")?.attr("content")?.trim()
+            ?.takeIf(String::isNotBlank)
+            ?: content.take(240).trimEnd() + if (content.length > 240) "..." else ""
+        val tags = article.select(".tags-links a, a[rel=tag]").map { it.text().trim() }.filter(String::isNotBlank)
 
-        val title = document.selectFirst("meta[property=og:title]")?.attr("content")?.trim()
-            ?: document.selectFirst("h1")?.text()?.trim()
-            ?: "Untitled"
-
-        val poster = fixUrlNull(
-            document.selectFirst("meta[property=og:image]")?.attr("content")
-                ?: document.selectFirst("video")?.attr("poster")
-        )
-
-        val description = document.selectFirst("meta[property=og:description]")?.attr("content")?.trim()
-            ?: document.selectFirst("meta[name=description]")?.attr("content")?.trim()
-            ?: document.selectFirst(".entry-content p, .description, .post-content p")?.text()?.trim()
-
-        val tags = document.select("a[rel=tag], .tags a, .post-tags a")
-            .mapNotNull { it.text().ifBlank { null } }
-            .distinct()
-
-        val recommendations = document.select(
-            ".related-posts article, .related article, .related-videos .item, .related li"
-        ).mapNotNull { it.toSearchResult() }
-
+        StoryReader.cache(url, StoryDocument(title, content))
         return newMovieLoadResponse(title, url, TvType.NSFW, url) {
             this.posterUrl = poster
             this.plot = description
             this.tags = tags
-            this.recommendations = recommendations
         }
     }
 
@@ -123,73 +77,58 @@ class Desikahani2 : MainAPI() {
         data: String,
         isCasting: Boolean,
         subtitleCallback: (SubtitleFile) -> Unit,
-        callback: (ExtractorLink) -> Unit
-    ): Boolean {
-        val doc = app.get(data).document
-        val raw = doc.html()
+        callback: (ExtractorLink) -> Unit,
+    ): Boolean = false
 
-        val candidates = mutableSetOf<String>()
-
-        // 1) Direct <video>/<source> tags
-        doc.select("video source, video").forEach { el ->
-            val src = el.attr("src")
-            if (src.isNotBlank()) candidates.add(fixUrl(src))
-        }
-
-        // 2) Iframes (embedded players) – most common for tube sites
-        doc.select("iframe").forEach { el ->
-            val src = el.attr("src").ifBlank { el.attr("data-src") }
-            if (src.isNotBlank()) candidates.add(fixUrl(src))
-        }
-
-        // 3) Inline JS – file: "...", source: "...", "https://....mp4|.m3u8"
-        val patterns = listOf(
-            Regex("""file\s*:\s*["']([^"']+\.(?:mp4|m3u8)[^"']*)["']""", RegexOption.IGNORE_CASE),
-            Regex("""source\s*:\s*["']([^"']+\.(?:mp4|m3u8)[^"']*)["']""", RegexOption.IGNORE_CASE),
-            Regex("""src\s*[:=]\s*["']([^"']+\.(?:mp4|m3u8)[^"']*)["']""", RegexOption.IGNORE_CASE),
-            Regex("""(https?://[^\s"'<>]+\.(?:mp4|m3u8)[^\s"'<>]*)""", RegexOption.IGNORE_CASE)
+    private suspend fun getDocument(url: String): Document {
+        val response = app.get(
+            url,
+            headers = mapOf(
+                "Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "Accept-Language" to "en-US,en;q=0.8,hi;q=0.7",
+                "Referer" to "$mainUrl/",
+            ),
         )
-        patterns.forEach { rgx ->
-            rgx.findAll(raw).forEach { m -> candidates.add(m.groupValues[1]) }
+        val doc = response.document
+        if (response.code == 403 || doc.title().contains("Just a moment", true)) {
+            throw ErrorLoadingException("The website temporarily requested Cloudflare verification. Try again shortly.")
         }
-
-        if (candidates.isEmpty()) return false
-
-        candidates.forEach { link ->
-            val low = link.lowercase()
-            when {
-                low.contains(".m3u8") -> {
-                    M3u8Helper.generateM3u8(
-                        source = name,
-                        streamUrl = link,
-                        referer = mainUrl
-                    ).forEach(callback)
-                }
-                low.contains(".mp4") -> {
-                    callback.invoke(
-                        newExtractorLink(
-                            source = name,
-                            name = name,
-                            url = link,
-                            type = INFER_TYPE
-                        ) {
-                            this.referer = mainUrl
-                            this.quality = getIndexQuality(link)
-                        }
-                    )
-                }
-                else -> {
-                    // Unknown iframe host – hand off to CloudStream’s extractor registry
-                    loadExtractor(link, mainUrl, subtitleCallback, callback)
-                }
-            }
-        }
-        return true
+        return doc
     }
 
-    private fun getIndexQuality(str: String?): Int {
-        return Regex("(\\d{3,4})[pP]").find(str ?: "")
-            ?.groupValues?.getOrNull(1)?.toIntOrNull()
-            ?: Qualities.Unknown.value
+    private fun Element.toSearchResponse(): SearchResponse? {
+        val link = selectFirst("h2.entry-title a[href], h1.entry-title a[href]") ?: return null
+        val title = link.text().trim().ifBlank { return null }
+        val href = link.absUrl("href").ifBlank { link.attr("href") }.ifBlank { return null }
+        val image = selectFirst(".post-image img, .entry-content img, img.wp-post-image")
+        val poster = image?.attr("data-src")?.takeIf(String::isNotBlank)
+            ?: image?.attr("src")?.takeIf(String::isNotBlank)
+            ?: LOGO_URL
+        return newMovieSearchResponse(title, href, TvType.NSFW) { this.posterUrl = poster }
+    }
+
+    private fun extractStoryText(content: Element): String {
+        val clean = content.clone()
+        clean.select(
+            "script, style, iframe, form, ins, .code-block, .sharedaddy, .post-views, " +
+                ".jp-relatedposts, .yarpp-related, .ad, [class*=advert], [id*=advert]",
+        ).remove()
+        clean.select("br").append("\n")
+        clean.select("p, div, h2, h3, h4, li, blockquote").forEach { it.append("\n\n") }
+        return clean.wholeText()
+            .replace('\u00a0', ' ')
+            .replace(Regex("[ \\t]+\\n"), "\n")
+            .replace(Regex("\\n{3,}"), "\n\n")
+            .trim()
+    }
+
+    private fun pagedUrl(base: String, page: Int): String =
+        if (page <= 1) base else "${base.trimEnd('/')}/page/$page/"
+
+    companion object {
+        const val API_NAME = "DesiKahaniya"
+        const val LOGO_URL = "https://www.desikahani2.net/wp-content/uploads/2014/12/dk_logo.png"
     }
 }
+
+data class StoryDocument(val title: String, val text: String)

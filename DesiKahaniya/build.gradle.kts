@@ -1,19 +1,15 @@
-// use an integer that increments with every release
-version = 1
+version = 2
 
 cloudstream {
     language = "hi"
-    description = "DesiKahani2 – Desi adult video site"
+    description = "Hindi and regional Indian adult stories with an in-app reader"
     authors = listOf("Digital")
-
-    /**
-     * Status int as the following:
-     * 0: Down
-     * 1: Ok
-     * 2: Slow
-     * 3: Beta only
-     **/
     status = 1
     tvTypes = listOf("NSFW")
-    iconUrl = "https://www.google.com/s2/favicons?domain=desikahani2.net&sz=%size%"
+    iconUrl = "https://www.desikahani2.net/wp-content/uploads/2014/12/dk_logo.png"
+}
+
+dependencies {
+    compileOnly("androidx.appcompat:appcompat:1.7.1")
+    compileOnly("androidx.fragment:fragment-ktx:1.8.9")
 }
