@@ -60,5 +60,26 @@
     "iconUrl": "https://cinemahubb.pages.dev/banner.png",
     "apiVersion": 1,
     "fileHash": "sha256-5cbc10fdd7dfb02f5d3fd516d3b37cbb9e4af4831c01007036a4956952a28d72"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/MultiMovies.cs3",
+    "status": 1,
+    "version": 1,
+    "name": "Multimovies",
+    "internalName": "MultiMovies",
+    "authors": [
+      "Digital"
+    ],
+    "description": "Multimovies movies and TV shows",
+    "fileSize": 16330,
+    "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+    "language": "en",
+    "tvTypes": [
+      "Movie",
+      "TvSeries"
+    ],
+    "iconUrl": "https://multimovies.beer/wp-content/uploads/2023/04/multimovies.jpg",
+    "apiVersion": 1,
+    "fileHash": "sha256-35b3362714ae5ed3ae8b8e09c75d9a830a7ee96f1b443884c56215dd50474092"
   }
 ]
