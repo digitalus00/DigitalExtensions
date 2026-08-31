@@ -2,14 +2,14 @@
   {
     "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/DesiKahaniya.cs3",
     "status": 1,
-    "version": 3,
+    "version": 4,
     "name": "DesiKahaniya",
     "internalName": "DesiKahaniya",
     "authors": [
       "Digital"
     ],
     "description": "Hindi and regional Indian adult stories with an in-app reader",
-    "fileSize": 22836,
+    "fileSize": 22856,
     "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
     "language": "hi",
     "tvTypes": [
@@ -17,7 +17,7 @@
     ],
     "iconUrl": "https://www.desikahani2.net/wp-content/uploads/2014/12/dk_logo.png",
     "apiVersion": 1,
-    "fileHash": "sha256-fbea210148699dd83af3ca7d3b0c98ff2d48f6dad13e9885a41f27238b2446eb"
+    "fileHash": "sha256-3f822f1cbf98d5883947c10a6eaca578cfc24d38dce4093dd0c231748d0ded03"
   },
   {
     "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/PrMovies.cs3",
@@ -43,14 +43,14 @@
   {
     "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/CinemaHub.cs3",
     "status": 1,
-    "version": 1,
+    "version": 2,
     "name": "CinemaHub",
     "internalName": "CinemaHub",
     "authors": [
       "Digital"
     ],
     "description": "CinemaHub movies and TV series",
-    "fileSize": 22561,
+    "fileSize": 22791,
     "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
     "language": "en",
     "tvTypes": [
@@ -59,19 +59,19 @@
     ],
     "iconUrl": "https://cinemahubb.pages.dev/banner.png",
     "apiVersion": 1,
-    "fileHash": "sha256-5cbc10fdd7dfb02f5d3fd516d3b37cbb9e4af4831c01007036a4956952a28d72"
+    "fileHash": "sha256-f18c37464ffc06ca3ea5954bcfc5e7548896bf84902ce433a658c22cf05d07cc"
   },
   {
     "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/MultiMovies.cs3",
     "status": 1,
-    "version": 1,
+    "version": 2,
     "name": "Multimovies",
     "internalName": "MultiMovies",
     "authors": [
       "Digital"
     ],
     "description": "Multimovies movies and TV shows",
-    "fileSize": 16330,
+    "fileSize": 16375,
     "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
     "language": "en",
     "tvTypes": [
@@ -80,7 +80,7 @@
     ],
     "iconUrl": "https://multimovies.beer/wp-content/uploads/2023/04/multimovies.jpg",
     "apiVersion": 1,
-    "fileHash": "sha256-35b3362714ae5ed3ae8b8e09c75d9a830a7ee96f1b443884c56215dd50474092"
+    "fileHash": "sha256-c56ab9e0f247131d7d59f863b65d8304ba05bf89b1faec3e0c49642f64874e8e"
   },
   {
     "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/HDHub4u.cs3",
