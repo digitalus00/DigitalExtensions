@@ -39,5 +39,26 @@
     "iconUrl": "https://prmovies.energy/wp-content/uploads/2026/08/cropped-images-1-3-8-1-1-1-1-1-1.png",
     "apiVersion": 1,
     "fileHash": "sha256-b6012200c1cdafae67e67c456279ba81219bd45fc631ebf161b7748258cf7410"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/CinemaHub.cs3",
+    "status": 1,
+    "version": 1,
+    "name": "CinemaHub",
+    "internalName": "CinemaHub",
+    "authors": [
+      "Digital"
+    ],
+    "description": "CinemaHub movies and TV series",
+    "fileSize": 22561,
+    "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+    "language": "en",
+    "tvTypes": [
+      "Movie",
+      "TvSeries"
+    ],
+    "iconUrl": "https://cinemahubb.pages.dev/banner.png",
+    "apiVersion": 1,
+    "fileHash": "sha256-5cbc10fdd7dfb02f5d3fd516d3b37cbb9e4af4831c01007036a4956952a28d72"
   }
 ]
