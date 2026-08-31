@@ -123,5 +123,65 @@
     "iconUrl": "https://cinevood.bingo/wp-content/uploads/2020/07/favicon2.png",
     "apiVersion": 1,
     "fileHash": "sha256-0de90cbfc5a6e1eb3fde57a8859e5012e478db5481f75aa1baaa51915c77d3de"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/Girlswallowed.cs3",
+    "status": 1,
+    "version": 1,
+    "name": "Girlswallowed",
+    "internalName": "Girlswallowed",
+    "authors": [
+      "Digital"
+    ],
+    "description": "Girlswallowed adult video catalog",
+    "fileSize": 14343,
+    "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+    "language": "en",
+    "tvTypes": [
+      "NSFW"
+    ],
+    "iconUrl": "https://girlswallowed.com/wp-content/uploads/2023/01/cropped-509-5091098_freetoedit-remixit-purple-purpleaesthetic-aesthetic-rolling-stones-logo-192x192.png",
+    "apiVersion": 1,
+    "fileHash": "sha256-e2fe827898acf130e4880a1cfe7db673e65913963a9abab4224be8aebf1acf9c"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/MatureTube.cs3",
+    "status": 1,
+    "version": 1,
+    "name": "MatureTube",
+    "internalName": "MatureTube",
+    "authors": [
+      "Digital"
+    ],
+    "description": "MatureTube adult video catalog",
+    "fileSize": 14942,
+    "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+    "language": "en",
+    "tvTypes": [
+      "NSFW"
+    ],
+    "iconUrl": "https://www.maturetube.com/favicon.ico",
+    "apiVersion": 1,
+    "fileHash": "sha256-cefb400c50e9c453aa7cc251b65213437295401d10b61795a0f7b8f958129844"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/HornySimp.cs3",
+    "status": 1,
+    "version": 1,
+    "name": "HornySimp",
+    "internalName": "HornySimp",
+    "authors": [
+      "Digital"
+    ],
+    "description": "HornySimp adult video catalog",
+    "fileSize": 13917,
+    "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+    "language": "en",
+    "tvTypes": [
+      "NSFW"
+    ],
+    "iconUrl": "https://hornysimp.com/wp-content/uploads/2020/12/cropped-png24-1-150x150.png",
+    "apiVersion": 1,
+    "fileHash": "sha256-8daeda2723f775385d14505d6ec3ca73d8fcf5cc36ffc305a7e10dd833afde11"
   }
 ]
