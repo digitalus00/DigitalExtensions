@@ -18,6 +18,15 @@ class CineVood : MainAPI() {
 
     private val cloudflareKiller = CloudflareKiller()
 
+    private val catalogPages = listOf(
+        mainUrl,
+        "$mainUrl/bollywood/",
+        "$mainUrl/hindi-dubbed/hollywood-dubbed/",
+        "$mainUrl/hindi-dubbed/south-dubbed/",
+        "$mainUrl/web-series/",
+        "$mainUrl/18-adult/",
+    )
+
     override val mainPage = mainPageOf(
         mainUrl to "Latest",
         "$mainUrl/bollywood/" to "Bollywood",
@@ -37,20 +46,32 @@ class CineVood : MainAPI() {
     override suspend fun search(query: String, page: Int): SearchResponseList {
         val encoded = URLEncoder.encode(query, "UTF-8")
         val url = if (page <= 1) "$mainUrl/?s=$encoded" else "$mainUrl/page/$page/?s=$encoded"
-        val doc = getDocument(url)
-        val items = doc.select("article.latestPost").mapNotNull { it.toSearchResponse() }.distinctBy { it.url }
-        return newSearchResponseList(items, hasNext = hasNextPage(doc, page))
+        val direct = runCatching {
+            val doc = getDocument(url)
+            val items = parseItems(doc)
+            newSearchResponseList(items, hasNext = hasNextPage(doc, page))
+        }.getOrNull()
+        if (direct != null && direct.items.isNotEmpty()) return direct
+
+        if (page > 1) return newSearchResponseList(emptyList(), hasNext = false)
+        val terms = query.trim().lowercase().split(Regex("\\s+")).filter(String::isNotBlank)
+        val fallback = catalogPages.flatMap { catalogUrl ->
+            runCatching { parseItems(getDocument(catalogUrl)) }.getOrDefault(emptyList())
+        }.distinctBy { it.url }.filter { result ->
+            val title = result.name.lowercase()
+            terms.all(title::contains)
+        }
+        return newSearchResponseList(fallback, hasNext = false)
     }
 
     override suspend fun quickSearch(query: String): List<SearchResponse> = search(query, 1).items
 
     override suspend fun load(url: String): LoadResponse {
         val doc = getDocument(url)
-        val title = doc.selectFirst("h1.title, h1.entry-title, .single-title, article h1")?.text()?.trim()
-            ?: doc.selectFirst("meta[property=og:title]")?.attr("content")?.substringBefore(" CineVood")?.trim()
+        val title = cleanTitle(doc.selectFirst("h1.title, h1.entry-title, .single-title, article h1")?.text()
+            ?: doc.selectFirst("meta[property=og:title]")?.attr("content"))
             ?: throw ErrorLoadingException("CineVood title was not found")
-        val content = doc.selectFirst(".thecontent, .post-single-content, .entry-content, article .post-content")
-            ?: throw ErrorLoadingException("CineVood post content was not found")
+        val content = doc.selectFirst(".thecontent, .post-single-content, .entry-content, article .post-content, article.post") ?: doc
         val poster = doc.selectFirst("meta[property=og:image]")?.attr("content")?.takeIf(String::isNotBlank)
             ?: content.selectFirst("img[src]")?.attr("src")?.takeIf(String::isNotBlank)
         val plot = doc.selectFirst("meta[property=og:description]")?.attr("content")?.trim()?.takeIf(String::isNotBlank)
@@ -58,6 +79,8 @@ class CineVood : MainAPI() {
         val year = Regex("\\b(19|20)\\d{2}\\b").find(title)?.value?.toIntOrNull()
         val tags = doc.select(".thecategory a, .post-info a[rel=category], .tags a, a[rel=tag]")
             .map { it.text().trim() }.filter(String::isNotBlank).distinct()
+        val recommendations = doc.select(".related-posts article.latestPost, article.latestPost")
+            .mapNotNull { it.toSearchResponse() }.filter { it.url != url }.distinctBy { it.url }
         val episodeLinks = content.select("a[href]").mapNotNull { link ->
             val label = link.text().trim()
             val match = Regex("(?i)(?:episode|ep)[ ._-]*(\\d+)").find(label) ?: return@mapNotNull null
@@ -77,13 +100,15 @@ class CineVood : MainAPI() {
                 this.plot = plot
                 this.year = year
                 this.tags = tags
+                this.recommendations = recommendations
             }
         }
-        return newMovieLoadResponse(title, url, TvType.Movie, url) {
+        return newMovieLoadResponse(title, url, if (isSeries) TvType.TvSeries else TvType.Movie, url) {
             this.posterUrl = poster
             this.plot = plot
             this.year = year
             this.tags = tags
+            this.recommendations = recommendations
         }
     }
 
@@ -97,14 +122,15 @@ class CineVood : MainAPI() {
             return loadExtractor(data, mainUrl, subtitleCallback, callback)
         }
         val doc = getDocument(data)
-        val content = doc.selectFirst(".thecontent, .post-single-content, .entry-content, article .post-content") ?: doc
+        val content = doc.selectFirst(".thecontent, .post-single-content, .entry-content, article .post-content, article.post") ?: doc
         val candidates = buildList {
             addAll(content.select("iframe[src], video[src], video source[src]").map { it.absUrl("src").ifBlank { it.attr("src") } })
-            addAll(content.select("a[href]").map { it.absUrl("href").ifBlank { it.attr("href") } })
+            addAll(content.select("a[href]:has(button), a.btn[href], a.button[href], a[href*='download'], a[href*='watch'], a[href*='stream']")
+                .map { it.absUrl("href").ifBlank { it.attr("href") } })
         }.filter { link ->
             link.startsWith("http") &&
                 !link.startsWith(mainUrl) &&
-                !link.contains(Regex("(?i)(youtube|youtu\\.be|facebook|twitter|instagram|telegram|whatsapp|imdb|tmdb|image\\.tmdb|wp-content)"))
+                !link.contains(Regex("(?i)(youtube|youtu\\.be|facebook|twitter|instagram|telegram|whatsapp|imdb|tmdb|image\\.tmdb|wp-content|doubleclick|googlesyndication)"))
         }.distinct()
 
         var found = false
@@ -140,8 +166,8 @@ class CineVood : MainAPI() {
     private fun Element.toSearchResponse(): SearchResponse? {
         val link = selectFirst("h2.title a[href], a.post-image[href], h2 a[href]") ?: return null
         val href = link.absUrl("href").ifBlank { link.attr("href") }.takeIf { it.startsWith(mainUrl) } ?: return null
-        val title = selectFirst("h2.title, h2.front-view-title")?.text()?.trim()
-            ?: link.attr("title").trim().takeIf(String::isNotBlank)
+        val title = cleanTitle(selectFirst("h2.title, h2.front-view-title")?.text()
+            ?: link.attr("title"))
             ?: return null
         val image = selectFirst("img")
         val poster = image?.attr("data-src")?.takeIf(String::isNotBlank)
@@ -157,4 +183,11 @@ class CineVood : MainAPI() {
             doc.select(".pagination a, .page-numbers a").any { it.text().toIntOrNull()?.let { number -> number > page } == true }
 
     private fun pagedUrl(base: String, page: Int): String = if (page <= 1) base else "${base.trimEnd('/')}/page/$page/"
+
+    private fun parseItems(doc: Document): List<SearchResponse> =
+        doc.select("article.latestPost").mapNotNull { it.toSearchResponse() }.distinctBy { it.url }
+
+    private fun cleanTitle(value: String?): String? = value?.trim()
+        ?.replace(Regex("(?i)\\s*[-|]?\\s*CineVood\\s*$"), "")
+        ?.trim()?.takeIf(String::isNotBlank)
 }

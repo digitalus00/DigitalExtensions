@@ -23,14 +23,14 @@
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/CineVood.cs3",
         "status": 1,
-        "version": 1,
+        "version": 2,
         "name": "CineVood",
         "internalName": "CineVood",
         "authors": [
             "Digital"
         ],
         "description": "CineVood movies and web series",
-        "fileSize": 18004,
+        "fileSize": 21271,
         "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
         "language": "hi",
         "tvTypes": [
@@ -39,7 +39,7 @@
         ],
         "iconUrl": "https://cinevood.bingo/wp-content/uploads/2020/07/favicon2.png",
         "apiVersion": 1,
-        "fileHash": "sha256-0de90cbfc5a6e1eb3fde57a8859e5012e478db5481f75aa1baaa51915c77d3de"
+        "fileHash": "sha256-e1f3f58465215e9747e05e567caf64fc34a4b6c8155790dd8531aeab45af3a77"
     },
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/DesiKahaniya.cs3",
