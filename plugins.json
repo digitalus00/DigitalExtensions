@@ -81,5 +81,26 @@
     "iconUrl": "https://multimovies.beer/wp-content/uploads/2023/04/multimovies.jpg",
     "apiVersion": 1,
     "fileHash": "sha256-35b3362714ae5ed3ae8b8e09c75d9a830a7ee96f1b443884c56215dd50474092"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/HDHub4u.cs3",
+    "status": 1,
+    "version": 1,
+    "name": "HDHub4u",
+    "internalName": "HDHub4u",
+    "authors": [
+      "Digital"
+    ],
+    "description": "HDHub4u Hindi, Bollywood, Hollywood and South Indian downloads",
+    "fileSize": 11918,
+    "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+    "language": "hi",
+    "tvTypes": [
+      "Movie",
+      "TvSeries"
+    ],
+    "iconUrl": "https://new5.hdhub4u.cl/wp-content/uploads/2024/01/cropped-CompressJPEG.online_512x512_image.png",
+    "apiVersion": 1,
+    "fileHash": "sha256-40b33869347fe4e1659add280702ae0944cb86ac17b405f4cd715921c68c4a50"
   }
 ]
