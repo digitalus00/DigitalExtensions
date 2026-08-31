@@ -3,6 +3,7 @@ package com.glttv
 
 import android.app.Dialog
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
@@ -30,10 +31,16 @@ object StoryReader {
     }
     private val buttons = mutableMapOf<String, WeakReference<View>>()
     private var registeredManager: FragmentManager? = null
+    private var preferences: SharedPreferences? = null
+
+    fun initialize(context: Context) {
+        preferences = context.applicationContext.getSharedPreferences("desikahaniya_stories", Context.MODE_PRIVATE)
+    }
 
     @Synchronized
     fun cache(url: String, story: StoryDocument) {
         stories[url] = story
+        preferences?.edit()?.putString(url, story.title + "\u0000" + story.text)?.apply()
         buttons[url]?.get()?.post { buttons[url]?.get()?.visibility = View.VISIBLE }
     }
 
@@ -112,13 +119,22 @@ object StoryReader {
 
     @Synchronized
     private fun showWhenReady(button: View, url: String) {
-        button.visibility = if (stories.containsKey(url)) View.VISIBLE else View.GONE
+        button.visibility = if (story(url) != null) View.VISIBLE else View.GONE
         buttons[url] = WeakReference(button)
     }
 
     @Synchronized
     private fun open(activity: AppCompatActivity, url: String) {
-        stories[url]?.let { ReaderDialog(activity, it).show() }
+        story(url)?.let { ReaderDialog(activity, it).show() }
+    }
+
+    @Synchronized
+    private fun story(url: String): StoryDocument? {
+        stories[url]?.let { return it }
+        val stored = preferences?.getString(url, null) ?: return null
+        val separator = stored.indexOf('\u0000')
+        if (separator < 0) return null
+        return StoryDocument(stored.substring(0, separator), stored.substring(separator + 1)).also { stories[url] = it }
     }
 
     private fun readerButton(context: Context, tv: Boolean, action: () -> Unit) = TextView(context).apply {

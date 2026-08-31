@@ -33,7 +33,7 @@ class CinemaHub : MainAPI() {
     override suspend fun quickSearch(query: String) = search(query, 1).items
 
     override suspend fun load(url: String): LoadResponse {
-        val parts = url.removePrefix("cinemahub:").split(":")
+        val parts = url.substringAfter("/title/").split("/")
         val type = parts[0]
         val id = parts[1]
         val detail = api<Detail>("$mainUrl/api/v1/catalog/details/$type/$id")
@@ -44,15 +44,15 @@ class CinemaHub : MainAPI() {
         val year = (detail.release_date ?: detail.first_air_date)?.take(4)?.toIntOrNull()
         if (type == "tv") {
             val episodes = detail.seasons.orEmpty().filter { (it.season_number ?: 0) > 0 }.flatMap { seasonData ->
-                (1..(seasonData.episode_count ?: 0)).map { ep -> newEpisode("cinemahub:tv:$id:${seasonData.season_number}:$ep") { this.season = seasonData.season_number ?: 1; this.episode = ep; name = "Episode $ep" } }
+                (1..(seasonData.episode_count ?: 0)).map { ep -> newEpisode("$mainUrl/play/tv/$id/${seasonData.season_number}/$ep") { this.season = seasonData.season_number ?: 1; this.episode = ep; name = "Episode $ep" } }
             }
             return newTvSeriesLoadResponse(title, url, TvType.TvSeries, episodes) { posterUrl = poster; backgroundPosterUrl = backdrop; plot = detail.overview; this.year = year; tags = genres }
         }
-        return newMovieLoadResponse(title, url, TvType.Movie, "cinemahub:movie:$id") { posterUrl = poster; backgroundPosterUrl = backdrop; plot = detail.overview; this.year = year; tags = genres }
+        return newMovieLoadResponse(title, url, TvType.Movie, "$mainUrl/play/movie/$id") { posterUrl = poster; backgroundPosterUrl = backdrop; plot = detail.overview; this.year = year; tags = genres }
     }
 
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
-        val p = data.removePrefix("cinemahub:").split(":")
+        val p = data.substringAfter("/play/").split("/")
         val type = p[0]; val id = p[1]
         val path = if (type == "movie") "/api/v1/extract/movie/$id" else "/api/v1/extract/tv/$id?s=${p[2]}&e=${p[3]}"
         val result = api<Streams>(mainUrl + path)
@@ -66,7 +66,7 @@ class CinemaHub : MainAPI() {
     }
 
     private suspend inline fun <reified T> api(url: String): T = gson.fromJson(app.get(url, headers = mapOf("Accept" to "application/json", "Cache-Control" to "no-cache")).text, T::class.java)
-    private fun Item.search(): SearchResponse = if (media_type == "tv") newTvSeriesSearchResponse(title ?: "Unknown", "cinemahub:tv:$id", TvType.TvSeries) { posterUrl = poster_path; year = release_date?.take(4)?.toIntOrNull() } else newMovieSearchResponse(title ?: "Unknown", "cinemahub:movie:$id", TvType.Movie) { posterUrl = poster_path; year = release_date?.take(4)?.toIntOrNull() }
+    private fun Item.search(): SearchResponse = if (media_type == "tv") newTvSeriesSearchResponse(title ?: "Unknown", "$mainUrl/title/tv/$id", TvType.TvSeries) { posterUrl = poster_path; year = release_date?.take(4)?.toIntOrNull() } else newMovieSearchResponse(title ?: "Unknown", "$mainUrl/title/movie/$id", TvType.Movie) { posterUrl = poster_path; year = release_date?.take(4)?.toIntOrNull() }
 }
 
 data class CatalogResponse(val results: List<Item> = emptyList(), val total_pages: Int = 1)

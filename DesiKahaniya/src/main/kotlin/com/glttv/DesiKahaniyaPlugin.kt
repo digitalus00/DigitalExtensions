@@ -8,6 +8,7 @@ import com.lagradost.cloudstream3.plugins.Plugin
 @CloudstreamPlugin
 class DesiKahaniyaPlugin : Plugin() {
     override fun load(context: Context) {
+        StoryReader.initialize(context)
         (context as? AppCompatActivity)?.let(StoryReader::register)
         registerMainAPI(DesiKahaniya())
     }
