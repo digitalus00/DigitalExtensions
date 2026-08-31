@@ -87,6 +87,7 @@ class DesiKahaniya : MainAPI() {
                 "Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                 "Accept-Language" to "en-US,en;q=0.8,hi;q=0.7",
                 "Referer" to "$mainUrl/",
+                "Cache-Control" to "no-cache",
             ),
         )
         val doc = response.document

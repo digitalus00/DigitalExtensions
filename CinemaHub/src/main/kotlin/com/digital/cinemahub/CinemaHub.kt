@@ -65,7 +65,7 @@ class CinemaHub : MainAPI() {
         return result.streams.orEmpty().isNotEmpty()
     }
 
-    private suspend inline fun <reified T> api(url: String): T = gson.fromJson(app.get(url, headers = mapOf("Accept" to "application/json")).text, T::class.java)
+    private suspend inline fun <reified T> api(url: String): T = gson.fromJson(app.get(url, headers = mapOf("Accept" to "application/json", "Cache-Control" to "no-cache")).text, T::class.java)
     private fun Item.search(): SearchResponse = if (media_type == "tv") newTvSeriesSearchResponse(title ?: "Unknown", "cinemahub:tv:$id", TvType.TvSeries) { posterUrl = poster_path; year = release_date?.take(4)?.toIntOrNull() } else newMovieSearchResponse(title ?: "Unknown", "cinemahub:movie:$id", TvType.Movie) { posterUrl = poster_path; year = release_date?.take(4)?.toIntOrNull() }
 }
 

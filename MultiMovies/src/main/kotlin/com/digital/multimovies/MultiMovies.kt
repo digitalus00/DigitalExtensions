@@ -19,13 +19,13 @@ class MultiMovies : MainAPI() {
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
         val doc = getDoc(if (page <= 1) request.data else "${request.data.trimEnd('/')}/page/$page/")
-        val items = doc.select(".items article, .result-item, .movie-item, article.item").mapNotNull { it.toResult() }.distinctBy { it.url }
+        val items = doc.select(".thumb, .items article, .result-item, .movie-item, article.item").mapNotNull { it.toResult() }.distinctBy { it.url }
         return newHomePageResponse(request.name, items, hasNext = doc.selectFirst("a.next, .pagination a.next, .nav-previous a") != null)
     }
     override suspend fun search(query: String, page: Int): SearchResponseList {
         val url = if (page <= 1) "$mainUrl/?s=${URLEncoder.encode(query, "UTF-8")}" else "$mainUrl/page/$page/?s=${URLEncoder.encode(query, "UTF-8")}"
         val doc = getDoc(url)
-        return newSearchResponseList(doc.select(".result-item, .movie-item, article.item").mapNotNull { it.toResult() }.distinctBy { it.url }, hasNext = doc.selectFirst("a.next, .pagination a.next") != null)
+        return newSearchResponseList(doc.select(".thumb, .result-item, .movie-item, article.item").mapNotNull { it.toResult() }.distinctBy { it.url }, hasNext = doc.selectFirst("a.next, .pagination a.next") != null)
     }
     override suspend fun quickSearch(query: String) = search(query, 1).items
 
@@ -62,6 +62,6 @@ class MultiMovies : MainAPI() {
         candidates.filter { it.startsWith("http") }.distinct().forEach { link -> if (link.matches(Regex(".*\\.(m3u8|mp4)(\\?.*)?", RegexOption.IGNORE_CASE))) { callback(newExtractorLink(name, "Direct", link, if (link.contains("m3u8", true)) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO)); found = true } else if (loadExtractor(link, data, subtitleCallback, callback)) found = true }
         return found
     }
-    private suspend fun getDoc(url: String): Document = app.get(url, referer = mainUrl, headers = mapOf("Accept" to "text/html,application/xhtml+xml" )).document
+    private suspend fun getDoc(url: String): Document = app.get(url, referer = mainUrl, headers = mapOf("Accept" to "text/html,application/xhtml+xml", "Cache-Control" to "no-cache")).document
     private fun Element.toResult(): SearchResponse? { val a = selectFirst("a[href]") ?: return null; val href = a.absUrl("href").ifBlank { a.attr("href") }; if (!href.contains("/movies/") && !href.contains("/tvshows/")) return null; val title = selectFirst(".title, h2, h3, .data h3")?.text()?.trim() ?: a.selectFirst("img[alt]")?.attr("alt")?.trim() ?: return null; val img = selectFirst("img"); val poster = img?.attr("data-src")?.takeIf { it.isNotBlank() } ?: img?.attr("src")?.takeIf { it.isNotBlank() }; return if (href.contains("/tvshows/")) newTvSeriesSearchResponse(title, href, TvType.TvSeries) { posterUrl = poster } else newMovieSearchResponse(title, href, TvType.Movie) { posterUrl = poster } }
 }
