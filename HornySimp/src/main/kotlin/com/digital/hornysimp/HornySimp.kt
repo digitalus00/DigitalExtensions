@@ -7,6 +7,9 @@ import org.jsoup.nodes.Element
 import java.net.URLEncoder
 
 class HornySimp : MainAPI() {
+    data class VidaraStream(val streaming_url: String? = null, val subtitles: List<VidaraSubtitle>? = null)
+    data class VidaraSubtitle(val file: String? = null, val label: String? = null)
+
     override var mainUrl = "https://hornysimp.com"
     override var name = "HornySimp"
     override var lang = "en"
@@ -57,9 +60,38 @@ class HornySimp : MainAPI() {
             if (link.contains(Regex("\\.(m3u8|mp4)(\\?|$)", RegexOption.IGNORE_CASE))) {
                 callback(newExtractorLink(name, name, link, if (link.contains(".m3u8", true)) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO) { referer = data })
                 found = true
+            } else if (link.contains("vidara.to/", true) && loadVidara(link, data, subtitleCallback, callback)) {
+                found = true
+            } else if (link.contains("hrnyvid.xyz/", true) && loadLuluStream(link, data, callback)) {
+                found = true
             } else if (loadExtractor(link, data, subtitleCallback, callback)) found = true
         }
         return found
+    }
+
+    private suspend fun loadVidara(embedUrl: String, pageUrl: String, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
+        val origin = Regex("^(https?://[^/]+)").find(embedUrl)?.groupValues?.get(1) ?: return false
+        val fileCode = embedUrl.substringBefore('?').trimEnd('/').substringAfterLast('/').takeIf(String::isNotBlank) ?: return false
+        val stream = runCatching {
+            app.post("$origin/api/stream", json = mapOf("filecode" to fileCode, "device" to "android"), referer = pageUrl).parsed<VidaraStream>()
+        }.getOrNull() ?: return false
+        val streamUrl = stream.streaming_url?.takeIf { it.startsWith("http") } ?: return false
+        stream.subtitles.orEmpty().forEach { subtitle ->
+            subtitle.file?.takeIf { it.startsWith("http") }?.let { subtitleCallback(newSubtitleFile(subtitle.label ?: "Unknown", it)) }
+        }
+        callback(newExtractorLink(name, "Vidara", streamUrl, ExtractorLinkType.M3U8) { referer = embedUrl })
+        return true
+    }
+
+    private suspend fun loadLuluStream(embedUrl: String, pageUrl: String, callback: (ExtractorLink) -> Unit): Boolean {
+        val html = runCatching { app.get(embedUrl, referer = pageUrl).text }.getOrNull() ?: return false
+        val packed = Regex("eval\\(function\\(p,a,c,k,e,[rd]\\).*?</script>", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
+            .find(html)?.value?.substringBefore("</script>") ?: return false
+        val unpacked = runCatching { JsUnpacker(packed).unpack() }.getOrNull() ?: return false
+        val streamUrl = Regex("https?://[^\\s\\\"']+?\\.m3u8(?:\\?[^\\s\\\"']*)?", RegexOption.IGNORE_CASE)
+            .find(unpacked.replace("\\/", "/"))?.value ?: return false
+        callback(newExtractorLink(name, "LuluStream", streamUrl, ExtractorLinkType.M3U8) { referer = embedUrl })
+        return true
     }
 
     private fun Element.toResult(): SearchResponse? {

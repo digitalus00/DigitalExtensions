@@ -145,14 +145,14 @@
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/HornySimp.cs3",
         "status": 1,
-        "version": 1,
+        "version": 2,
         "name": "HornySimp",
         "internalName": "HornySimp",
         "authors": [
             "Digital"
         ],
         "description": "HornySimp adult video catalog",
-        "fileSize": 13917,
+        "fileSize": 21350,
         "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
         "language": "en",
         "tvTypes": [
@@ -160,19 +160,19 @@
         ],
         "iconUrl": "https://hornysimp.com/wp-content/uploads/2020/12/cropped-png24-1-150x150.png",
         "apiVersion": 1,
-        "fileHash": "sha256-8daeda2723f775385d14505d6ec3ca73d8fcf5cc36ffc305a7e10dd833afde11"
+        "fileHash": "sha256-11000f7af9e18fe1d719a35be2a547227c6adbaf98d924541f29317877dccbae"
     },
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/MatureTube.cs3",
         "status": 1,
-        "version": 1,
+        "version": 2,
         "name": "MatureTube",
         "internalName": "MatureTube",
         "authors": [
             "Digital"
         ],
         "description": "MatureTube adult video catalog",
-        "fileSize": 14942,
+        "fileSize": 13578,
         "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
         "language": "en",
         "tvTypes": [
@@ -180,7 +180,7 @@
         ],
         "iconUrl": "https://www.maturetube.com/favicon.ico",
         "apiVersion": 1,
-        "fileHash": "sha256-cefb400c50e9c453aa7cc251b65213437295401d10b61795a0f7b8f958129844"
+        "fileHash": "sha256-60c49e733287b2d8727cae8d51a71ceee10dd7f9668443254cfdcbe370d9c012"
     },
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/MultiMovies.cs3",
