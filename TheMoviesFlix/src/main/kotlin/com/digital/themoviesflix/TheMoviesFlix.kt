@@ -105,11 +105,18 @@ class TheMoviesFlix : MainAPI() {
             .distinct()
         var found = false
         links.forEach { link ->
-            val resolved = runCatching {
-                app.get(link, referer = data, interceptor = downloadResolver, allowRedirects = true).url
-            }.getOrNull()?.takeIf { it.startsWith("http") } ?: link
+            val resolvedRequest = runCatching {
+                downloadResolver.resolveUsingWebView(link, data) { request ->
+                    request.url.toString().contains(Regex("\\.(mkv|mp4|m3u8)(\\?|$)", RegexOption.IGNORE_CASE))
+                }.first
+            }.getOrNull()
+            val resolved = resolvedRequest?.url?.toString()?.takeIf { it.startsWith("http") } ?: return@forEach
+            val requestHeaders = resolvedRequest.headers.toMap()
             if (resolved.contains(Regex("\\.(mp4|m3u8)(\\?|$)", RegexOption.IGNORE_CASE))) {
-                callback(newExtractorLink(name, "Direct", resolved, if (resolved.contains(".m3u8", true)) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO) { referer = data })
+                callback(newExtractorLink(name, "Direct", resolved, if (resolved.contains(".m3u8", true)) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO) {
+                    referer = requestHeaders["Referer"] ?: data
+                    headers = requestHeaders
+                })
                 found = true
             } else if (loadExtractor(resolved, data, subtitleCallback, callback)) found = true
         }

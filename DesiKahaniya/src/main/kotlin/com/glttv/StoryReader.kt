@@ -54,7 +54,7 @@ object StoryReader {
     @Synchronized
     fun cache(url: String, story: StoryDocument) {
         stories[url] = story
-        preferences?.edit()?.putString(url, story.title + "\u0000" + story.text)?.apply()
+        preferences?.edit()?.putString(url, story.title + "\u0000" + story.text)?.commit()
         buttons[url]?.get()?.post { buttons[url]?.get()?.visibility = View.VISIBLE }
     }
 
@@ -148,7 +148,7 @@ object StoryReader {
 
     @Synchronized
     private fun showWhenReady(button: View, url: String) {
-        button.visibility = if (story(url) != null) View.VISIBLE else View.GONE
+        button.visibility = View.VISIBLE
         buttons[url] = WeakReference(button)
     }
 

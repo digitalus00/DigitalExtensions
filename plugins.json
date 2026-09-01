@@ -44,14 +44,14 @@
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/DesiKahaniya.cs3",
         "status": 1,
-        "version": 8,
+        "version": 9,
         "name": "DesiKahaniya",
         "internalName": "DesiKahaniya",
         "authors": [
             "Digital"
         ],
         "description": "Hindi and regional Indian adult stories with an in-app reader",
-        "fileSize": 24599,
+        "fileSize": 24595,
         "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
         "language": "hi",
         "tvTypes": [
@@ -59,7 +59,7 @@
         ],
         "iconUrl": "https://www.desikahani2.net/wp-content/uploads/2014/12/dk_logo.png",
         "apiVersion": 1,
-        "fileHash": "sha256-c7be84db7c1472ea992f11696f4f0c6a58d3641d3ec36965575db35040340856"
+        "fileHash": "sha256-f7ac9d54b13d894bdc8090b3c1ad3c5d75222e70d2b403cff4cb8745ef8647c4"
     },
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/GdlLiveTv.cs3",
@@ -267,14 +267,14 @@
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/TheMoviesFlix.cs3",
         "status": 1,
-        "version": 4,
+        "version": 5,
         "name": "TheMoviesFlix",
         "internalName": "TheMoviesFlix",
         "authors": [
             "Digital"
         ],
         "description": "TheMoviesFlix Bollywood, Hollywood and Hindi dubbed movie catalog",
-        "fileSize": 18187,
+        "fileSize": 18932,
         "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
         "language": "hi",
         "tvTypes": [
@@ -283,6 +283,6 @@
         ],
         "iconUrl": "https://themoviesflix.actor/wp-content/uploads/2026/06/cropped-favicon-192x192.png",
         "apiVersion": 1,
-        "fileHash": "sha256-bf0f00376b8783857ecfe906eb617025e360e2a0eb49523746231b96a267260a"
+        "fileHash": "sha256-096f48ab3ff91bc390644d6e3ef9cb228e93a7353d03677802b334be2039b3ff"
     }
 ]
