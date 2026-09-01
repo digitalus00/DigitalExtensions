@@ -267,14 +267,14 @@
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/TheMoviesFlix.cs3",
         "status": 1,
-        "version": 2,
+        "version": 3,
         "name": "TheMoviesFlix",
         "internalName": "TheMoviesFlix",
         "authors": [
             "Digital"
         ],
         "description": "TheMoviesFlix Bollywood, Hollywood and Hindi dubbed movie catalog",
-        "fileSize": 15863,
+        "fileSize": 17921,
         "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
         "language": "hi",
         "tvTypes": [
@@ -283,6 +283,6 @@
         ],
         "iconUrl": "https://themoviesflix.actor/wp-content/uploads/2026/06/cropped-favicon-192x192.png",
         "apiVersion": 1,
-        "fileHash": "sha256-ef304983dcc7ed93deb22c60b44bb07b5780e1b7557dff68e592037c9044a388"
+        "fileHash": "sha256-a959bbb22aedaa6349a3c7f1bc7f3d81b7875a43a55d6231c32348a684d528e6"
     }
 ]
