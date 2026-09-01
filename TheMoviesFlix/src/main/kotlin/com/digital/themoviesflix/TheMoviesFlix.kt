@@ -94,7 +94,15 @@ class TheMoviesFlix : MainAPI() {
             .filterNot { it.contains(Regex("(?i)(imdb|youtube|telegram|how-to-download|facebook|twitter)")) }
             .distinct()
         var found = false
-        links.forEach { link -> if (loadExtractor(link, data, subtitleCallback, callback)) found = true }
+        links.forEach { link ->
+            val resolved = runCatching {
+                app.get(link, referer = data, interceptor = cloudflareKiller, allowRedirects = true).url
+            }.getOrNull()?.takeIf { it.startsWith("http") } ?: link
+            if (resolved.contains(Regex("\\.(mp4|m3u8)(\\?|$)", RegexOption.IGNORE_CASE))) {
+                callback(newExtractorLink(name, "Direct", resolved, if (resolved.contains(".m3u8", true)) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO) { referer = data })
+                found = true
+            } else if (loadExtractor(resolved, data, subtitleCallback, callback)) found = true
+        }
         return found
     }
 
