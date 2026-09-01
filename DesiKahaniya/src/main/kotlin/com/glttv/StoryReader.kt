@@ -2,6 +2,8 @@
 package com.glttv
 
 import android.app.Dialog
+import android.app.Activity
+import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
@@ -35,6 +37,18 @@ object StoryReader {
 
     fun initialize(context: Context) {
         preferences = context.applicationContext.getSharedPreferences("desikahaniya_stories", Context.MODE_PRIVATE)
+        (context as? AppCompatActivity)?.let(::register)
+        (context.applicationContext as? Application)?.registerActivityLifecycleCallbacks(
+            object : Application.ActivityLifecycleCallbacks {
+                override fun onActivityCreated(activity: Activity, state: Bundle?) { (activity as? AppCompatActivity)?.let(::register) }
+                override fun onActivityStarted(activity: Activity) = Unit
+                override fun onActivityResumed(activity: Activity) { (activity as? AppCompatActivity)?.let(::register) }
+                override fun onActivityPaused(activity: Activity) = Unit
+                override fun onActivityStopped(activity: Activity) = Unit
+                override fun onActivitySaveInstanceState(activity: Activity, state: Bundle) = Unit
+                override fun onActivityDestroyed(activity: Activity) = Unit
+            },
+        )
     }
 
     @Synchronized

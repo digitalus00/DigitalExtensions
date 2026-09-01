@@ -1,12 +1,14 @@
 package com.glttv
 
 import com.lagradost.cloudstream3.*
+import com.lagradost.cloudstream3.network.CloudflareKiller
 import com.lagradost.cloudstream3.utils.ExtractorLink
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.net.URLEncoder
 
 class DesiKahaniya : MainAPI() {
+    private val cloudflareKiller = CloudflareKiller()
     override var mainUrl = "https://www.desikahani2.net"
     override var name = API_NAME
     override var lang = "hi"
@@ -60,15 +62,12 @@ class DesiKahaniya : MainAPI() {
             ?: throw ErrorLoadingException("Story text was not found")
         val poster = doc.selectFirst("meta[property=og:image]")?.attr("content")?.takeIf(String::isNotBlank)
             ?: LOGO_URL
-        val description = doc.selectFirst("meta[property=og:description]")?.attr("content")?.trim()
-            ?.takeIf(String::isNotBlank)
-            ?: content.take(240).trimEnd() + if (content.length > 240) "..." else ""
         val tags = article.select(".tags-links a, a[rel=tag]").map { it.text().trim() }.filter(String::isNotBlank)
 
         StoryReader.cache(url, StoryDocument(title, content))
         return newMovieLoadResponse(title, url, TvType.NSFW, url) {
             this.posterUrl = poster
-            this.plot = description
+            this.plot = content
             this.tags = tags
         }
     }
@@ -89,6 +88,7 @@ class DesiKahaniya : MainAPI() {
                 "Referer" to "$mainUrl/",
                 "Cache-Control" to "no-cache",
             ),
+            interceptor = cloudflareKiller,
         )
         val doc = response.document
         if (response.code == 403 || doc.title().contains("Just a moment", true)) {

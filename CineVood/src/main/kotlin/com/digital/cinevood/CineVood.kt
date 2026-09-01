@@ -8,6 +8,14 @@ import org.jsoup.nodes.Element
 import java.net.URLEncoder
 
 class CineVood : MainAPI() {
+    data class SearchResult(val found: Int = 0, val hits: List<SearchHit> = emptyList())
+    data class SearchHit(val document: SearchDocument? = null)
+    data class SearchDocument(
+        val post_title: String? = null,
+        val permalink: String? = null,
+        val post_thumbnail: String? = null,
+    )
+
     override var mainUrl = "https://cinevood.bingo"
     override var name = "CineVood"
     override var lang = "hi"
@@ -45,11 +53,22 @@ class CineVood : MainAPI() {
 
     override suspend fun search(query: String, page: Int): SearchResponseList {
         val encoded = URLEncoder.encode(query, "UTF-8")
-        val url = if (page <= 1) "$mainUrl/?s=$encoded" else "$mainUrl/page/$page/?s=$encoded"
         val direct = runCatching {
-            val doc = getDocument(url)
-            val items = parseItems(doc)
-            newSearchResponseList(items, hasNext = hasNextPage(doc, page))
+            val response = app.get(
+                "$mainUrl/search.php?q=$encoded&page=$page",
+                referer = "$mainUrl/search.html?q=$encoded",
+                interceptor = cloudflareKiller,
+            ).parsed<SearchResult>()
+            val items = response.hits.mapNotNull { hit ->
+                val item = hit.document ?: return@mapNotNull null
+                val title = cleanTitle(item.post_title) ?: return@mapNotNull null
+                val href = item.permalink?.let(::fixUrl)?.takeIf { it.startsWith(mainUrl) } ?: return@mapNotNull null
+                val year = Regex("\\b(19|20)\\d{2}\\b").find(title)?.value?.toIntOrNull()
+                val isSeries = title.contains(Regex("(?i)season|web[ ._-]*series|complete series"))
+                if (isSeries) newTvSeriesSearchResponse(title, href, TvType.TvSeries) { posterUrl = item.post_thumbnail; this.year = year }
+                else newMovieSearchResponse(title, href, TvType.Movie) { posterUrl = item.post_thumbnail; this.year = year }
+            }
+            newSearchResponseList(items, hasNext = page * 18 < response.found)
         }.getOrNull()
         if (direct != null && direct.items.isNotEmpty()) return direct
 

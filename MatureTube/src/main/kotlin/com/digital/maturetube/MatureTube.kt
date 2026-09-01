@@ -7,6 +7,8 @@ import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 import com.lagradost.cloudstream3.utils.AppUtils.toJson
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
+import java.net.URLDecoder
+import java.net.URLEncoder
 
 class MatureTube : MainAPI() {
     data class MatureTubeItem(val title: String, val poster: String? = null, val outUrl: String)
@@ -51,14 +53,14 @@ class MatureTube : MainAPI() {
     override suspend fun quickSearch(query: String): List<SearchResponse> = search(query, 1).items
 
     override suspend fun load(url: String): LoadResponse {
-        val item = parseJson<MatureTubeItem>(url)
+        val item = parseJson<MatureTubeItem>(URLDecoder.decode(url.substringAfter("/__item__?data="), "UTF-8"))
         return newMovieLoadResponse(item.title, url, TvType.NSFW, item.outUrl) { posterUrl = item.poster }
     }
 
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
-        val response = app.get(data, referer = "$mainUrl/", interceptor = cloudflareKiller, headers = defaultHeaders)
-        val destination = response.url.takeIf { it.startsWith("http") && !it.startsWith(mainUrl) }
-            ?: response.headers["Location"]?.let(::fixUrl)
+        val response = app.get(data, referer = "$mainUrl/", interceptor = cloudflareKiller, headers = defaultHeaders, allowRedirects = false)
+        val destination = response.headers["Location"]?.let(::fixUrl)
+            ?: response.url.takeIf { it.startsWith("http") && !it.startsWith(mainUrl) }
             ?: return false
         return loadExtractor(destination, data, subtitleCallback, callback)
     }
@@ -90,7 +92,8 @@ class MatureTube : MainAPI() {
         val poster = listOf("data-src", "data-original", "src")
             .firstNotNullOfOrNull { key -> image?.attr(key)?.takeIf(String::isNotBlank) }?.let(::fixUrl)
         val item = MatureTubeItem(title, poster, outUrl)
-        return newMovieSearchResponse(title, item.toJson(), TvType.NSFW) { posterUrl = poster }
+        val itemUrl = "$mainUrl/__item__?data=${URLEncoder.encode(item.toJson(), "UTF-8")}"
+        return newMovieSearchResponse(title, itemUrl, TvType.NSFW) { posterUrl = poster }
     }
 
     private fun pagedUrl(base: String, page: Int): String {
