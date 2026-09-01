@@ -29,7 +29,7 @@ class DesiKahaniya : MainAPI() {
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
         val doc = getDocument(pagedUrl(request.data, page))
-        val items = doc.select("article.post").mapNotNull { it.toSearchResponse() }
+        val items = doc.select("article.post, article.inside-article").mapNotNull { it.toSearchResponse() }.distinctBy { it.url }
         return newHomePageResponse(
             request.name,
             items,
@@ -42,7 +42,7 @@ class DesiKahaniya : MainAPI() {
         val url = if (page <= 1) "$mainUrl/?s=$encoded" else "$mainUrl/page/$page/?s=$encoded"
         val doc = getDocument(url)
         return newSearchResponseList(
-            doc.select("article.post").mapNotNull { it.toSearchResponse() },
+            doc.select("article.post, article.inside-article").mapNotNull { it.toSearchResponse() }.distinctBy { it.url },
             hasNext = doc.selectFirst("a.next.page-numbers, a.nextpostslink") != null,
         )
     }
@@ -51,7 +51,7 @@ class DesiKahaniya : MainAPI() {
 
     override suspend fun load(url: String): LoadResponse {
         val doc = getDocument(url)
-        val article = doc.selectFirst("article.post")
+        val article = doc.selectFirst("article.post, article.inside-article, .inside-article")
             ?: throw ErrorLoadingException("Story content was not found")
         val title = article.selectFirst("h1.entry-title")?.text()?.trim()
             ?: doc.selectFirst("meta[property=og:title]")?.attr("content")?.trim()
@@ -98,7 +98,7 @@ class DesiKahaniya : MainAPI() {
     }
 
     private fun Element.toSearchResponse(): SearchResponse? {
-        val link = selectFirst("h2.entry-title a[href], h1.entry-title a[href]") ?: return null
+        val link = selectFirst("h2.entry-title a[href], h1.entry-title a[href], .entry-title a[href]") ?: return null
         val title = link.text().trim().ifBlank { return null }
         val href = link.absUrl("href").ifBlank { link.attr("href") }.ifBlank { return null }
         val image = selectFirst(".post-image img, .entry-content img, img.wp-post-image")

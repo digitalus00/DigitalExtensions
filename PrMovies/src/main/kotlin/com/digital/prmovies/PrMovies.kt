@@ -1,6 +1,7 @@
 package com.digital.prmovies
 
 import com.lagradost.cloudstream3.*
+import com.lagradost.cloudstream3.network.CloudflareKiller
 import com.lagradost.cloudstream3.utils.ExtractorLink
 import com.lagradost.cloudstream3.utils.ExtractorLinkType
 import com.lagradost.cloudstream3.utils.loadExtractor
@@ -10,6 +11,7 @@ import org.jsoup.nodes.Element
 import java.net.URLEncoder
 
 class PrMovies : MainAPI() {
+    private val cloudflareKiller = CloudflareKiller()
     override var mainUrl = "https://prmovies.energy"
     override var name = "PRMovies"
     override var lang = "hi"
@@ -144,6 +146,7 @@ class PrMovies : MainAPI() {
                 "Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                 "Accept-Language" to "en-US,en;q=0.9,hi;q=0.8",
             ),
+            interceptor = cloudflareKiller,
         )
         val doc = response.document
         if (response.code == 403 || doc.title().contains("Just a moment", true)) {
