@@ -23,14 +23,14 @@
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/CineVood.cs3",
         "status": 1,
-        "version": 2,
+        "version": 3,
         "name": "CineVood",
         "internalName": "CineVood",
         "authors": [
             "Digital"
         ],
         "description": "CineVood movies and web series",
-        "fileSize": 21271,
+        "fileSize": 24843,
         "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
         "language": "hi",
         "tvTypes": [
@@ -39,19 +39,19 @@
         ],
         "iconUrl": "https://cinevood.bingo/wp-content/uploads/2020/07/favicon2.png",
         "apiVersion": 1,
-        "fileHash": "sha256-e1f3f58465215e9747e05e567caf64fc34a4b6c8155790dd8531aeab45af3a77"
+        "fileHash": "sha256-21cad4b543789c51a6074da274c3d2d293234c677c657a73958eb548e6e93af6"
     },
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/DesiKahaniya.cs3",
         "status": 1,
-        "version": 5,
+        "version": 6,
         "name": "DesiKahaniya",
         "internalName": "DesiKahaniya",
         "authors": [
             "Digital"
         ],
         "description": "Hindi and regional Indian adult stories with an in-app reader",
-        "fileSize": 23462,
+        "fileSize": 23849,
         "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
         "language": "hi",
         "tvTypes": [
@@ -59,7 +59,7 @@
         ],
         "iconUrl": "https://www.desikahani2.net/wp-content/uploads/2014/12/dk_logo.png",
         "apiVersion": 1,
-        "fileHash": "sha256-85eeb282f11fea6cbcd39deaa5a0a8d8245970435ac026e22d640d82a8bed031"
+        "fileHash": "sha256-c146ac0401feb14158c937a418b79aca9acdccae7b7c4374b35658b95147841e"
     },
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/GdlLiveTv.cs3",
@@ -163,16 +163,36 @@
         "fileHash": "sha256-11000f7af9e18fe1d719a35be2a547227c6adbaf98d924541f29317877dccbae"
     },
     {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/Lala49.cs3",
+        "status": 1,
+        "version": 1,
+        "name": "Lala49",
+        "internalName": "Lala49",
+        "authors": [
+            "Digital"
+        ],
+        "description": "LaLa49 / LaLaMasa self-hosted adult videos",
+        "fileSize": 13105,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "hi",
+        "tvTypes": [
+            "NSFW"
+        ],
+        "iconUrl": "https://lalamasa.mobi/wp-content/uploads/2026/05/cropped-favicon-512-192x192.png",
+        "apiVersion": 1,
+        "fileHash": "sha256-0692ccbfd1b8c444ad0691c32c6dbfc9519b01283370a79ca7721c832916381a"
+    },
+    {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/MatureTube.cs3",
         "status": 1,
-        "version": 2,
+        "version": 3,
         "name": "MatureTube",
         "internalName": "MatureTube",
         "authors": [
             "Digital"
         ],
         "description": "MatureTube adult video catalog",
-        "fileSize": 13578,
+        "fileSize": 13744,
         "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
         "language": "en",
         "tvTypes": [
@@ -180,7 +200,7 @@
         ],
         "iconUrl": "https://www.maturetube.com/favicon.ico",
         "apiVersion": 1,
-        "fileHash": "sha256-60c49e733287b2d8727cae8d51a71ceee10dd7f9668443254cfdcbe370d9c012"
+        "fileHash": "sha256-77fe20c6eecf6872d91c53ca013b546675c331242e453abfee7cbec2a2cbb431"
     },
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/MultiMovies.cs3",
