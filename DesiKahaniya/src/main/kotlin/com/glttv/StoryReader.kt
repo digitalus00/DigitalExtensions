@@ -60,7 +60,10 @@ object StoryReader {
 
     fun register(activity: AppCompatActivity) {
         val manager = activity.supportFragmentManager
-        if (registeredManager === manager) return
+        if (registeredManager === manager) {
+            injectExisting(activity, manager.fragments)
+            return
+        }
         registeredManager = manager
         manager.registerFragmentLifecycleCallbacks(
             object : FragmentManager.FragmentLifecycleCallbacks() {
@@ -77,6 +80,18 @@ object StoryReader {
                 }
             }, true,
         )
+        injectExisting(activity, manager.fragments)
+    }
+
+    private fun injectExisting(activity: AppCompatActivity, fragments: List<Fragment>) {
+        fragments.forEach { fragment ->
+            val args = fragment.arguments
+            val view = fragment.view
+            if (args?.getString("apiName") == DesiKahaniya.API_NAME && view != null) {
+                args.getString("url")?.let { injectButton(activity, view, it) }
+            }
+            injectExisting(activity, fragment.childFragmentManager.fragments)
+        }
     }
 
     private fun injectButton(activity: AppCompatActivity, root: View, url: String) {

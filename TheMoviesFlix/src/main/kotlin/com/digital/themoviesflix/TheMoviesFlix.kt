@@ -2,6 +2,7 @@ package com.digital.themoviesflix
 
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.network.CloudflareKiller
+import com.lagradost.cloudstream3.network.WebViewResolver
 import com.lagradost.cloudstream3.utils.*
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -16,6 +17,15 @@ class TheMoviesFlix : MainAPI() {
     override val hasQuickSearch = true
     override val vpnStatus = VPNStatus.MightBeNeeded
     private val cloudflareKiller = CloudflareKiller()
+    private val downloadResolver = WebViewResolver(
+        Regex("(?i)https?://.*\\.(?:mkv|mp4|m3u8)(?:\\?.*)?$"),
+        emptyList(),
+        null,
+        true,
+        null,
+        {},
+        60_000L,
+    )
 
     override val mainPage = mainPageOf(
         mainUrl to "Latest",
@@ -96,7 +106,7 @@ class TheMoviesFlix : MainAPI() {
         var found = false
         links.forEach { link ->
             val resolved = runCatching {
-                app.get(link, referer = data, interceptor = cloudflareKiller, allowRedirects = true).url
+                app.get(link, referer = data, interceptor = downloadResolver, allowRedirects = true).url
             }.getOrNull()?.takeIf { it.startsWith("http") } ?: link
             if (resolved.contains(Regex("\\.(mp4|m3u8)(\\?|$)", RegexOption.IGNORE_CASE))) {
                 callback(newExtractorLink(name, "Direct", resolved, if (resolved.contains(".m3u8", true)) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO) { referer = data })
