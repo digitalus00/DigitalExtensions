@@ -54,23 +54,25 @@ class IndianSexStories3 : MainAPI() {
 
     override suspend fun load(url: String): LoadResponse {
         val doc = getDocument(url)
-        val article = doc.selectFirst("article.post, .inside-article")
-            ?: throw ErrorLoadingException("Story content was not found")
-        val title = article.selectFirst("h1.entry-title, h2.post-title")?.text()?.trim()
+        val article = doc.selectFirst("article.post, article.inside-article") ?: doc.body()
+        val title = article.selectFirst("h1.post-title, h1.entry-title, h1.title, h2.post-title")?.text()?.trim()
             ?: doc.selectFirst("meta[property=og:title]")?.attr("content")?.trim()
             ?: throw ErrorLoadingException("Story title was not found")
-        val content = article.selectFirst(".entry-content, .thecontent")
+        val storyText = article.selectFirst(".story-content, .entry-content, .thecontent")
             ?.let(::extractStoryText)
             ?.takeIf { it.isNotBlank() }
-            ?: throw ErrorLoadingException("Story text was not found")
+        val videoText = article.selectFirst(".desc, .description")?.text()?.trim().orEmpty()
+        if (storyText == null && videoText.isBlank()) {
+            throw ErrorLoadingException("Story text was not found")
+        }
         val poster = doc.selectFirst("meta[property=og:image]")?.attr("content")?.takeIf(String::isNotBlank)
             ?: LOGO_URL
         val tags = article.select(".meta-tags a, .tags-links a, a[rel=tag]").map { it.text().trim() }.filter(String::isNotBlank)
 
-        StoryReader.cache(url, StoryDocument(title, content))
+        if (storyText != null) StoryReader.cache(url, StoryDocument(title, storyText))
         return newMovieLoadResponse(title, url, TvType.NSFW, url) {
             this.posterUrl = poster
-            this.plot = content
+            this.plot = storyText ?: videoText
             this.tags = tags
         }
     }
@@ -81,21 +83,24 @@ class IndianSexStories3 : MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ): Boolean {
-        val doc = getDocument(data)
-        val content = doc.selectFirst(".entry-content, .thecontent, article.post") ?: doc
-        val links = content.select("iframe[src], video[src], video source[src], audio[src], audio source[src], a[href]")
-            .map { it.absUrl("src").ifBlank { it.absUrl("href") }.ifBlank { it.attr("src").ifBlank { it.attr("href") } } }
-            .filter { it.startsWith("http") && !it.contains("indiansexstories3.com") }
-            .filterNot { it.contains(Regex("(?i)(youtube|youtu\\.be|facebook|twitter|instagram|telegram|whatsapp|image)")) }
-            .distinct()
-        var found = false
-        links.forEach { link ->
-            if (link.contains(Regex("\\.(m3u8|mp4|webm|mp3|m4a)(\\?|$)", RegexOption.IGNORE_CASE))) {
-                callback(newExtractorLink(name, "Direct", link, if (link.contains(Regex("\\.(mp3|m4a)(\\?|$)", RegexOption.IGNORE_CASE))) ExtractorLinkType.VIDEO else if (link.contains("m3u8", true)) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO) { referer = data })
-                found = true
-            } else if (loadExtractor(link, data, subtitleCallback, callback)) found = true
-        }
-        return found
+        if (!data.contains("/videos/")) return false
+        return runCatching {
+            val doc = getDocument(data)
+            val content = doc.selectFirst(".video-holder, .video-inner, article.post") ?: doc
+            val links = content.select("iframe[src], video[src], video source[src], audio[src], audio source[src], a[href]")
+                .map { it.absUrl("src").ifBlank { it.absUrl("href") }.ifBlank { it.attr("src").ifBlank { it.attr("href") } } }
+                .filter { it.startsWith("http") && !it.contains("indiansexstories3.com") }
+                .filterNot { it.contains(Regex("(?i)(youtube|youtu\\.be|facebook|twitter|instagram|telegram|whatsapp|image)")) }
+                .distinct()
+            var found = false
+            links.forEach { link ->
+                if (link.contains(Regex("\\.(m3u8|mp4|webm|mp3|m4a)(\\?|$)", RegexOption.IGNORE_CASE))) {
+                    callback(newExtractorLink(name, "Direct", link, if (link.contains(Regex("\\.(mp3|m4a)(\\?|$)", RegexOption.IGNORE_CASE))) ExtractorLinkType.VIDEO else if (link.contains("m3u8", true)) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO) { referer = data })
+                    found = true
+                } else if (loadExtractor(link, data, subtitleCallback, callback)) found = true
+            }
+            found
+        }.getOrDefault(false)
     }
 
     private suspend fun getDocument(url: String): Document {
@@ -119,12 +124,21 @@ class IndianSexStories3 : MainAPI() {
     private fun Element.toSearchResponse(): SearchResponse? {
         val link = selectFirst("h2.post-title a[href], h1.entry-title a[href], .post-title a[href]") ?: return null
         val title = link.text().trim().ifBlank { return null }
-        val href = link.absUrl("href").ifBlank { link.attr("href") }.takeIf { it.startsWith(mainUrl) } ?: return null
-        val image = selectFirst(".featured-thumbnail img, .entry-content img, img.wp-post-image")
+        val href = resolveHref(link) ?: return null
+        val image = selectFirst(".featured-thumbnail img, .post-image img, .entry-content img, img.wp-post-image")
         val poster = image?.attr("data-src")?.takeIf(String::isNotBlank)
             ?: image?.attr("src")?.takeIf(String::isNotBlank)
             ?: LOGO_URL
         return newMovieSearchResponse(title, href, TvType.NSFW) { this.posterUrl = poster }
+    }
+
+    private fun resolveHref(link: Element): String? {
+        val raw = link.absUrl("href").ifBlank { link.attr("href") }.ifBlank { return null }
+        return when {
+            raw.startsWith("http") -> raw
+            raw.startsWith("/") -> "$mainUrl$raw"
+            else -> "$mainUrl/$raw"
+        }
     }
 
     private fun extractStoryText(content: Element): String {
