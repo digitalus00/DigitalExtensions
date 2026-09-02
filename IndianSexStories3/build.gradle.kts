@@ -1,4 +1,4 @@
-version = 2
+version = 3
 
 cloudstream {
     language = "hi"
@@ -6,7 +6,7 @@ cloudstream {
     authors = listOf("Digital")
     status = 1
     tvTypes = listOf("NSFW")
-    iconUrl = "https://www.indiansexstories3.com/wp-content/uploads/2019/03/favicon.png"
+    iconUrl = "https://www.indiansexstories3.com/videos/contents/eldjdnoapebd/theme/logo.png"
 }
 
 dependencies {
