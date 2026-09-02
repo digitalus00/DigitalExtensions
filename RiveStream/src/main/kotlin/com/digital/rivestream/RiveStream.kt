@@ -51,7 +51,11 @@ class RiveStream : MainAPI() {
         return result.data?.sources?.isNotEmpty() == true
     }
     private fun poster(path: String?) = path?.let { "https://image.tmdb.org/t/p/w500$it" }
-    private suspend inline fun <reified T> api(url: String): T = gson.fromJson(app.get(url, headers = mapOf("Accept" to "application/json")).text, T::class.java)
+    private suspend inline fun <reified T> api(url: String): T {
+        val response = app.get(url, headers = mapOf("Accept" to "application/json", "Cache-Control" to "no-cache"))
+        if (response.code !in 200..299 || response.text.isBlank()) throw ErrorLoadingException("RiveStream API request failed ()")
+        return gson.fromJson(response.text, T::class.java)
+    }
     private fun Item.toSearch() = if (media_type == "tv") newTvSeriesSearchResponse(name ?: title ?: "Unknown", "$mainUrl/title/tv/$id", TvType.TvSeries) { posterUrl = poster(poster_path); year = (first_air_date ?: release_date)?.take(4)?.toIntOrNull() } else newMovieSearchResponse(title ?: name ?: "Unknown", "$mainUrl/title/movie/$id", TvType.Movie) { posterUrl = poster(poster_path); year = (release_date ?: first_air_date)?.take(4)?.toIntOrNull() }
 }
 data class TmdbList(val results: List<Item> = emptyList(), val total_pages: Int = 1)

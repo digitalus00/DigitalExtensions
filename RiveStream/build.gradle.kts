@@ -1,4 +1,4 @@
-version = 3
+version = 1
 cloudstream {
     language = "en"
     description = "RiveStream movies and TV series"
