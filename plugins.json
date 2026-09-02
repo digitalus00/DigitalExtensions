@@ -265,6 +265,27 @@
         "fileHash": "sha256-8083a48a9077da65c5ee702831cecddd7e93eb607b0b019071c1b0b60495bb0a"
     },
     {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/RiveStream.cs3",
+        "status": 1,
+        "version": 3,
+        "name": "RiveStream",
+        "internalName": "RiveStream",
+        "authors": [
+            "Digital"
+        ],
+        "description": "RiveStream movies and TV series",
+        "fileSize": 21240,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "en",
+        "tvTypes": [
+            "Movie",
+            "TvSeries"
+        ],
+        "iconUrl": "https://rivestream.ru/images/logo512.png",
+        "apiVersion": 1,
+        "fileHash": "sha256-92bc1742776cc16bd260554ddcf931a5295f4549e193d0b11a3d3c334c777015"
+    },
+    {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/TheMoviesFlix.cs3",
         "status": 1,
         "version": 5,
