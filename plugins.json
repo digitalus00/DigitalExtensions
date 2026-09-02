@@ -163,6 +163,26 @@
     "fileHash": "sha256-11000f7af9e18fe1d719a35be2a547227c6adbaf98d924541f29317877dccbae"
   },
   {
+    "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/IndianSexStories3.cs3",
+    "status": 1,
+    "version": 1,
+    "name": "IndianSexStories3",
+    "internalName": "IndianSexStories3",
+    "authors": [
+      "Digital"
+    ],
+    "description": "IndianSexStories3 stories and videos with an in-app reader",
+    "fileSize": 27882,
+    "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+    "language": "hi",
+    "tvTypes": [
+      "NSFW"
+    ],
+    "iconUrl": "https://www.indiansexstories3.com/wp-content/uploads/2019/03/favicon.png",
+    "apiVersion": 1,
+    "fileHash": "sha256-8bce8f41a879fe3532cc7bfff7b66464aa6a95f3b63eb6d4087cd4e91a220ca3"
+  },
+  {
     "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/Lala49.cs3",
     "status": 1,
     "version": 1,
