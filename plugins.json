@@ -1,5 +1,25 @@
 [
     {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/Beeg.cs3",
+        "status": 1,
+        "version": 1,
+        "name": "Beeg",
+        "internalName": "Beeg",
+        "authors": [
+            "Digital"
+        ],
+        "description": "Beeg adult video catalog",
+        "fileSize": 8314,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "en",
+        "tvTypes": [
+            "NSFW"
+        ],
+        "iconUrl": "https://beeg.com/favicon.ico",
+        "apiVersion": 1,
+        "fileHash": "sha256-a64692d4d07022428e393a0ac2eae4624464c572ffe89a16c464ae1f03f22262"
+    },
+    {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/CinemaHub.cs3",
         "status": 1,
         "version": 3,
@@ -163,6 +183,26 @@
         "fileHash": "sha256-11000f7af9e18fe1d719a35be2a547227c6adbaf98d924541f29317877dccbae"
     },
     {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/IndianSexStories3.cs3",
+        "status": 1,
+        "version": 3,
+        "name": "IndianSexStories3",
+        "internalName": "IndianSexStories3",
+        "authors": [
+            "Digital"
+        ],
+        "description": "IndianSexStories3 stories and videos with an in-app reader",
+        "fileSize": 34547,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "hi",
+        "tvTypes": [
+            "NSFW"
+        ],
+        "iconUrl": "https://www.indiansexstories3.com/videos/contents/eldjdnoapebd/theme/logo.png",
+        "apiVersion": 1,
+        "fileHash": "sha256-c501dab8329b538fedd83115f066ebfa6aa3445209109c8834cbd2a1364d4cd8"
+    },
+    {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/Lala49.cs3",
         "status": 1,
         "version": 1,
@@ -267,14 +307,14 @@
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/RiveStream.cs3",
         "status": 1,
-        "version": 3,
+        "version": 1,
         "name": "RiveStream",
         "internalName": "RiveStream",
         "authors": [
             "Digital"
         ],
         "description": "RiveStream movies and TV series",
-        "fileSize": 21240,
+        "fileSize": 21836,
         "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
         "language": "en",
         "tvTypes": [
@@ -283,7 +323,27 @@
         ],
         "iconUrl": "https://rivestream.ru/images/logo512.png",
         "apiVersion": 1,
-        "fileHash": "sha256-92bc1742776cc16bd260554ddcf931a5295f4549e193d0b11a3d3c334c777015"
+        "fileHash": "sha256-d782c89195f49b15b89d9cea85434de8f21af801b16817932c1f08b8b9ae9904"
+    },
+    {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/SpankBang.cs3",
+        "status": 1,
+        "version": 1,
+        "name": "SpankBang",
+        "internalName": "SpankBang",
+        "authors": [
+            "Digital"
+        ],
+        "description": "SpankBang adult video catalog",
+        "fileSize": 10842,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "en",
+        "tvTypes": [
+            "NSFW"
+        ],
+        "iconUrl": "https://spankbang.com/favicon.ico",
+        "apiVersion": 1,
+        "fileHash": "sha256-f18f235fc30c99ff93ab8d5420e07e19a6a8e0d5a6dc31bd1a0d49960947f445"
     },
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/TheMoviesFlix.cs3",
