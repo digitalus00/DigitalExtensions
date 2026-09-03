@@ -9,7 +9,7 @@
             "Digital"
         ],
         "description": "Beeg adult video catalog",
-        "fileSize": 8314,
+        "fileSize": 10739,
         "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
         "language": "en",
         "tvTypes": [
@@ -17,7 +17,7 @@
         ],
         "iconUrl": "https://beeg.com/favicon.ico",
         "apiVersion": 1,
-        "fileHash": "sha256-a64692d4d07022428e393a0ac2eae4624464c572ffe89a16c464ae1f03f22262"
+        "fileHash": "sha256-7ca206b57e999791c137c9831a7f8685d283260cfc6e3c80d6b51e73c3d73641"
     },
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/CinemaHub.cs3",
@@ -335,7 +335,7 @@
             "Digital"
         ],
         "description": "SpankBang adult video catalog",
-        "fileSize": 10842,
+        "fileSize": 11666,
         "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
         "language": "en",
         "tvTypes": [
@@ -343,7 +343,7 @@
         ],
         "iconUrl": "https://spankbang.com/favicon.ico",
         "apiVersion": 1,
-        "fileHash": "sha256-f18f235fc30c99ff93ab8d5420e07e19a6a8e0d5a6dc31bd1a0d49960947f445"
+        "fileHash": "sha256-555e4deac83731e403f07d6d6b8c31a2c1b38c56f55484a3e3bd1d387c9b4878"
     },
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/TheMoviesFlix.cs3",
