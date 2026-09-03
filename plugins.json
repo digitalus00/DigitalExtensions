@@ -1,329 +1,369 @@
 [
-  {
-    "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/CinemaHub.cs3",
-    "status": 1,
-    "version": 3,
-    "name": "CinemaHub",
-    "internalName": "CinemaHub",
-    "authors": [
-      "Digital"
-    ],
-    "description": "CinemaHub movies and TV series",
-    "fileSize": 22946,
-    "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
-    "language": "en",
-    "tvTypes": [
-      "Movie",
-      "TvSeries"
-    ],
-    "iconUrl": "https://cinemahubb.pages.dev/banner.png",
-    "apiVersion": 1,
-    "fileHash": "sha256-867507049a947096a291907949a922ef19d776c5cd6654edcf9ad12e879edf0d"
-  },
-  {
-    "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/CineVood.cs3",
-    "status": 1,
-    "version": 3,
-    "name": "CineVood",
-    "internalName": "CineVood",
-    "authors": [
-      "Digital"
-    ],
-    "description": "CineVood movies and web series",
-    "fileSize": 24843,
-    "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
-    "language": "hi",
-    "tvTypes": [
-      "Movie",
-      "TvSeries"
-    ],
-    "iconUrl": "https://cinevood.bingo/wp-content/uploads/2020/07/favicon2.png",
-    "apiVersion": 1,
-    "fileHash": "sha256-21cad4b543789c51a6074da274c3d2d293234c677c657a73958eb548e6e93af6"
-  },
-  {
-    "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/DesiKahaniya.cs3",
-    "status": 1,
-    "version": 9,
-    "name": "DesiKahaniya",
-    "internalName": "DesiKahaniya",
-    "authors": [
-      "Digital"
-    ],
-    "description": "Hindi and regional Indian adult stories with an in-app reader",
-    "fileSize": 24595,
-    "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
-    "language": "hi",
-    "tvTypes": [
-      "NSFW"
-    ],
-    "iconUrl": "https://www.desikahani2.net/wp-content/uploads/2014/12/dk_logo.png",
-    "apiVersion": 1,
-    "fileHash": "sha256-f7ac9d54b13d894bdc8090b3c1ad3c5d75222e70d2b403cff4cb8745ef8647c4"
-  },
-  {
-    "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/GdlLiveTv.cs3",
-    "status": 1,
-    "version": 1,
-    "name": "GdlLiveTv",
-    "internalName": "GdlLiveTv",
-    "authors": [
-      "Digital"
-    ],
-    "description": "GDL Live TV ",
-    "fileSize": 23676,
-    "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
-    "language": "en",
-    "tvTypes": [
-      "All"
-    ],
-    "iconUrl": "https://pinaycum.tv/favicon.ico",
-    "apiVersion": 1,
-    "fileHash": "sha256-108ceb8bf3896648169734a74747e37323ded496d7264864a3644b806478542f"
-  },
-  {
-    "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/Girlswallowed.cs3",
-    "status": 1,
-    "version": 1,
-    "name": "Girlswallowed",
-    "internalName": "Girlswallowed",
-    "authors": [
-      "Digital"
-    ],
-    "description": "Girlswallowed adult video catalog",
-    "fileSize": 14343,
-    "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
-    "language": "en",
-    "tvTypes": [
-      "NSFW"
-    ],
-    "iconUrl": "https://girlswallowed.com/wp-content/uploads/2023/01/cropped-509-5091098_freetoedit-remixit-purple-purpleaesthetic-aesthetic-rolling-stones-logo-192x192.png",
-    "apiVersion": 1,
-    "fileHash": "sha256-e2fe827898acf130e4880a1cfe7db673e65913963a9abab4224be8aebf1acf9c"
-  },
-  {
-    "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/GLTTV.cs3",
-    "status": 1,
-    "version": 2,
-    "name": "GLTTV",
-    "internalName": "GLTTV",
-    "authors": [
-      "Digital"
-    ],
-    "description": "GLT Tv",
-    "fileSize": 49419,
-    "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
-    "language": "en",
-    "tvTypes": [
-      "All"
-    ],
-    "iconUrl": "https://pinaycum.tv/favicon.ico",
-    "apiVersion": 1,
-    "fileHash": "sha256-df40769113232239d90faf891dd0bcce1169492f93a9f8fb50d1366cd9e9788d"
-  },
-  {
-    "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/HDHub4u.cs3",
-    "status": 1,
-    "version": 1,
-    "name": "HDHub4u",
-    "internalName": "HDHub4u",
-    "authors": [
-      "Digital"
-    ],
-    "description": "HDHub4u Hindi, Bollywood, Hollywood and South Indian downloads",
-    "fileSize": 11918,
-    "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
-    "language": "hi",
-    "tvTypes": [
-      "Movie",
-      "TvSeries"
-    ],
-    "iconUrl": "https://new5.hdhub4u.cl/wp-content/uploads/2024/01/cropped-CompressJPEG.online_512x512_image.png",
-    "apiVersion": 1,
-    "fileHash": "sha256-40b33869347fe4e1659add280702ae0944cb86ac17b405f4cd715921c68c4a50"
-  },
-  {
-    "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/HornySimp.cs3",
-    "status": 1,
-    "version": 2,
-    "name": "HornySimp",
-    "internalName": "HornySimp",
-    "authors": [
-      "Digital"
-    ],
-    "description": "HornySimp adult video catalog",
-    "fileSize": 21350,
-    "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
-    "language": "en",
-    "tvTypes": [
-      "NSFW"
-    ],
-    "iconUrl": "https://hornysimp.com/wp-content/uploads/2020/12/cropped-png24-1-150x150.png",
-    "apiVersion": 1,
-    "fileHash": "sha256-11000f7af9e18fe1d719a35be2a547227c6adbaf98d924541f29317877dccbae"
-  },
-  {
-    "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/IndianSexStories3.cs3",
-    "status": 1,
-    "version": 3,
-    "name": "IndianSexStories3",
-    "internalName": "IndianSexStories3",
-    "authors": [
-      "Digital"
-    ],
-    "description": "IndianSexStories3 stories and videos with an in-app reader",
-    "fileSize": 34547,
-    "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
-    "language": "hi",
-    "tvTypes": [
-      "NSFW"
-    ],
-    "iconUrl": "https://www.indiansexstories3.com/videos/contents/eldjdnoapebd/theme/logo.png",
-    "apiVersion": 1,
-    "fileHash": "sha256-c501dab8329b538fedd83115f066ebfa6aa3445209109c8834cbd2a1364d4cd8"
-  },
-  {
-    "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/Lala49.cs3",
-    "status": 1,
-    "version": 1,
-    "name": "Lala49",
-    "internalName": "Lala49",
-    "authors": [
-      "Digital"
-    ],
-    "description": "LaLa49 / LaLaMasa self-hosted adult videos",
-    "fileSize": 13105,
-    "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
-    "language": "hi",
-    "tvTypes": [
-      "NSFW"
-    ],
-    "iconUrl": "https://lalamasa.mobi/wp-content/uploads/2026/05/cropped-favicon-512-192x192.png",
-    "apiVersion": 1,
-    "fileHash": "sha256-0692ccbfd1b8c444ad0691c32c6dbfc9519b01283370a79ca7721c832916381a"
-  },
-  {
-    "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/MatureTube.cs3",
-    "status": 1,
-    "version": 3,
-    "name": "MatureTube",
-    "internalName": "MatureTube",
-    "authors": [
-      "Digital"
-    ],
-    "description": "MatureTube adult video catalog",
-    "fileSize": 13744,
-    "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
-    "language": "en",
-    "tvTypes": [
-      "NSFW"
-    ],
-    "iconUrl": "https://www.maturetube.com/favicon.ico",
-    "apiVersion": 1,
-    "fileHash": "sha256-77fe20c6eecf6872d91c53ca013b546675c331242e453abfee7cbec2a2cbb431"
-  },
-  {
-    "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/MultiMovies.cs3",
-    "status": 1,
-    "version": 3,
-    "name": "MultiMovies",
-    "internalName": "MultiMovies",
-    "authors": [
-      "Digital"
-    ],
-    "description": "Multimovies movies and TV shows",
-    "fileSize": 24365,
-    "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
-    "language": "en",
-    "tvTypes": [
-      "Movie",
-      "TvSeries"
-    ],
-    "iconUrl": "https://multimovies.beer/wp-content/uploads/2023/04/multimovies.jpg",
-    "apiVersion": 1,
-    "fileHash": "sha256-21d4f9214ea65a9679794e2443ef50ff8d2b7bef6277c722629b8b04b8aac129"
-  },
-  {
-    "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/PinayCum.cs3",
-    "status": 1,
-    "version": 2,
-    "name": "PinayCum",
-    "internalName": "PinayCum",
-    "authors": [
-      "Grok"
-    ],
-    "description": "PinayCum.tv - Filipino / Pinay adult videos",
-    "fileSize": 19218,
-    "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
-    "language": "tl",
-    "tvTypes": [
-      "NSFW"
-    ],
-    "iconUrl": "https://pinaycum.tv/favicon.ico",
-    "apiVersion": 1,
-    "fileHash": "sha256-c1f58a88657fd95032024dbe4236b624a04a5322519d97e378bdcd980b9ca35f"
-  },
-  {
-    "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/PrMovies.cs3",
-    "status": 1,
-    "version": 2,
-    "name": "PrMovies",
-    "internalName": "PrMovies",
-    "authors": [
-      "Digital"
-    ],
-    "description": "Movies and TV series from PRMovies",
-    "fileSize": 19649,
-    "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
-    "language": "hi",
-    "tvTypes": [
-      "Movie",
-      "TvSeries"
-    ],
-    "iconUrl": "https://prmovies.energy/wp-content/uploads/2026/08/cropped-images-1-3-8-1-1-1-1-1-1.png",
-    "apiVersion": 1,
-    "fileHash": "sha256-8083a48a9077da65c5ee702831cecddd7e93eb607b0b019071c1b0b60495bb0a"
-  },
-  {
-    "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/RiveStream.cs3",
-    "status": 1,
-    "version": 1,
-    "name": "RiveStream",
-    "internalName": "RiveStream",
-    "authors": [
-      "Digital"
-    ],
-    "description": "RiveStream movies and TV series",
-    "fileSize": 21836,
-    "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
-    "language": "en",
-    "tvTypes": [
-      "Movie",
-      "TvSeries"
-    ],
-    "iconUrl": "https://rivestream.ru/images/logo512.png",
-    "apiVersion": 1,
-    "fileHash": "sha256-d782c89195f49b15b89d9cea85434de8f21af801b16817932c1f08b8b9ae9904"
-  },
-  {
-    "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/TheMoviesFlix.cs3",
-    "status": 1,
-    "version": 5,
-    "name": "TheMoviesFlix",
-    "internalName": "TheMoviesFlix",
-    "authors": [
-      "Digital"
-    ],
-    "description": "TheMoviesFlix Bollywood, Hollywood and Hindi dubbed movie catalog",
-    "fileSize": 18932,
-    "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
-    "language": "hi",
-    "tvTypes": [
-      "Movie",
-      "TvSeries"
-    ],
-    "iconUrl": "https://themoviesflix.actor/wp-content/uploads/2026/06/cropped-favicon-192x192.png",
-    "apiVersion": 1,
-    "fileHash": "sha256-096f48ab3ff91bc390644d6e3ef9cb228e93a7353d03677802b334be2039b3ff"
-  }
+    {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/Beeg.cs3",
+        "status": 1,
+        "version": 1,
+        "name": "Beeg",
+        "internalName": "Beeg",
+        "authors": [
+            "Digital"
+        ],
+        "description": "Beeg adult video catalog",
+        "fileSize": 8314,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "en",
+        "tvTypes": [
+            "NSFW"
+        ],
+        "iconUrl": "https://beeg.com/favicon.ico",
+        "apiVersion": 1,
+        "fileHash": "sha256-a64692d4d07022428e393a0ac2eae4624464c572ffe89a16c464ae1f03f22262"
+    },
+    {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/CinemaHub.cs3",
+        "status": 1,
+        "version": 3,
+        "name": "CinemaHub",
+        "internalName": "CinemaHub",
+        "authors": [
+            "Digital"
+        ],
+        "description": "CinemaHub movies and TV series",
+        "fileSize": 22946,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "en",
+        "tvTypes": [
+            "Movie",
+            "TvSeries"
+        ],
+        "iconUrl": "https://cinemahubb.pages.dev/banner.png",
+        "apiVersion": 1,
+        "fileHash": "sha256-867507049a947096a291907949a922ef19d776c5cd6654edcf9ad12e879edf0d"
+    },
+    {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/CineVood.cs3",
+        "status": 1,
+        "version": 3,
+        "name": "CineVood",
+        "internalName": "CineVood",
+        "authors": [
+            "Digital"
+        ],
+        "description": "CineVood movies and web series",
+        "fileSize": 24843,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "hi",
+        "tvTypes": [
+            "Movie",
+            "TvSeries"
+        ],
+        "iconUrl": "https://cinevood.bingo/wp-content/uploads/2020/07/favicon2.png",
+        "apiVersion": 1,
+        "fileHash": "sha256-21cad4b543789c51a6074da274c3d2d293234c677c657a73958eb548e6e93af6"
+    },
+    {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/DesiKahaniya.cs3",
+        "status": 1,
+        "version": 9,
+        "name": "DesiKahaniya",
+        "internalName": "DesiKahaniya",
+        "authors": [
+            "Digital"
+        ],
+        "description": "Hindi and regional Indian adult stories with an in-app reader",
+        "fileSize": 24595,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "hi",
+        "tvTypes": [
+            "NSFW"
+        ],
+        "iconUrl": "https://www.desikahani2.net/wp-content/uploads/2014/12/dk_logo.png",
+        "apiVersion": 1,
+        "fileHash": "sha256-f7ac9d54b13d894bdc8090b3c1ad3c5d75222e70d2b403cff4cb8745ef8647c4"
+    },
+    {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/GdlLiveTv.cs3",
+        "status": 1,
+        "version": 1,
+        "name": "GdlLiveTv",
+        "internalName": "GdlLiveTv",
+        "authors": [
+            "Digital"
+        ],
+        "description": "GDL Live TV ",
+        "fileSize": 23676,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "en",
+        "tvTypes": [
+            "All"
+        ],
+        "iconUrl": "https://pinaycum.tv/favicon.ico",
+        "apiVersion": 1,
+        "fileHash": "sha256-108ceb8bf3896648169734a74747e37323ded496d7264864a3644b806478542f"
+    },
+    {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/Girlswallowed.cs3",
+        "status": 1,
+        "version": 1,
+        "name": "Girlswallowed",
+        "internalName": "Girlswallowed",
+        "authors": [
+            "Digital"
+        ],
+        "description": "Girlswallowed adult video catalog",
+        "fileSize": 14343,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "en",
+        "tvTypes": [
+            "NSFW"
+        ],
+        "iconUrl": "https://girlswallowed.com/wp-content/uploads/2023/01/cropped-509-5091098_freetoedit-remixit-purple-purpleaesthetic-aesthetic-rolling-stones-logo-192x192.png",
+        "apiVersion": 1,
+        "fileHash": "sha256-e2fe827898acf130e4880a1cfe7db673e65913963a9abab4224be8aebf1acf9c"
+    },
+    {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/GLTTV.cs3",
+        "status": 1,
+        "version": 2,
+        "name": "GLTTV",
+        "internalName": "GLTTV",
+        "authors": [
+            "Digital"
+        ],
+        "description": "GLT Tv",
+        "fileSize": 49419,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "en",
+        "tvTypes": [
+            "All"
+        ],
+        "iconUrl": "https://pinaycum.tv/favicon.ico",
+        "apiVersion": 1,
+        "fileHash": "sha256-df40769113232239d90faf891dd0bcce1169492f93a9f8fb50d1366cd9e9788d"
+    },
+    {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/HDHub4u.cs3",
+        "status": 1,
+        "version": 1,
+        "name": "HDHub4u",
+        "internalName": "HDHub4u",
+        "authors": [
+            "Digital"
+        ],
+        "description": "HDHub4u Hindi, Bollywood, Hollywood and South Indian downloads",
+        "fileSize": 11918,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "hi",
+        "tvTypes": [
+            "Movie",
+            "TvSeries"
+        ],
+        "iconUrl": "https://new5.hdhub4u.cl/wp-content/uploads/2024/01/cropped-CompressJPEG.online_512x512_image.png",
+        "apiVersion": 1,
+        "fileHash": "sha256-40b33869347fe4e1659add280702ae0944cb86ac17b405f4cd715921c68c4a50"
+    },
+    {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/HornySimp.cs3",
+        "status": 1,
+        "version": 2,
+        "name": "HornySimp",
+        "internalName": "HornySimp",
+        "authors": [
+            "Digital"
+        ],
+        "description": "HornySimp adult video catalog",
+        "fileSize": 21350,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "en",
+        "tvTypes": [
+            "NSFW"
+        ],
+        "iconUrl": "https://hornysimp.com/wp-content/uploads/2020/12/cropped-png24-1-150x150.png",
+        "apiVersion": 1,
+        "fileHash": "sha256-11000f7af9e18fe1d719a35be2a547227c6adbaf98d924541f29317877dccbae"
+    },
+    {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/IndianSexStories3.cs3",
+        "status": 1,
+        "version": 3,
+        "name": "IndianSexStories3",
+        "internalName": "IndianSexStories3",
+        "authors": [
+            "Digital"
+        ],
+        "description": "IndianSexStories3 stories and videos with an in-app reader",
+        "fileSize": 34547,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "hi",
+        "tvTypes": [
+            "NSFW"
+        ],
+        "iconUrl": "https://www.indiansexstories3.com/videos/contents/eldjdnoapebd/theme/logo.png",
+        "apiVersion": 1,
+        "fileHash": "sha256-c501dab8329b538fedd83115f066ebfa6aa3445209109c8834cbd2a1364d4cd8"
+    },
+    {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/Lala49.cs3",
+        "status": 1,
+        "version": 1,
+        "name": "Lala49",
+        "internalName": "Lala49",
+        "authors": [
+            "Digital"
+        ],
+        "description": "LaLa49 / LaLaMasa self-hosted adult videos",
+        "fileSize": 13105,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "hi",
+        "tvTypes": [
+            "NSFW"
+        ],
+        "iconUrl": "https://lalamasa.mobi/wp-content/uploads/2026/05/cropped-favicon-512-192x192.png",
+        "apiVersion": 1,
+        "fileHash": "sha256-0692ccbfd1b8c444ad0691c32c6dbfc9519b01283370a79ca7721c832916381a"
+    },
+    {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/MatureTube.cs3",
+        "status": 1,
+        "version": 3,
+        "name": "MatureTube",
+        "internalName": "MatureTube",
+        "authors": [
+            "Digital"
+        ],
+        "description": "MatureTube adult video catalog",
+        "fileSize": 13744,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "en",
+        "tvTypes": [
+            "NSFW"
+        ],
+        "iconUrl": "https://www.maturetube.com/favicon.ico",
+        "apiVersion": 1,
+        "fileHash": "sha256-77fe20c6eecf6872d91c53ca013b546675c331242e453abfee7cbec2a2cbb431"
+    },
+    {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/MultiMovies.cs3",
+        "status": 1,
+        "version": 3,
+        "name": "MultiMovies",
+        "internalName": "MultiMovies",
+        "authors": [
+            "Digital"
+        ],
+        "description": "Multimovies movies and TV shows",
+        "fileSize": 24365,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "en",
+        "tvTypes": [
+            "Movie",
+            "TvSeries"
+        ],
+        "iconUrl": "https://multimovies.beer/wp-content/uploads/2023/04/multimovies.jpg",
+        "apiVersion": 1,
+        "fileHash": "sha256-21d4f9214ea65a9679794e2443ef50ff8d2b7bef6277c722629b8b04b8aac129"
+    },
+    {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/PinayCum.cs3",
+        "status": 1,
+        "version": 2,
+        "name": "PinayCum",
+        "internalName": "PinayCum",
+        "authors": [
+            "Grok"
+        ],
+        "description": "PinayCum.tv - Filipino / Pinay adult videos",
+        "fileSize": 19218,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "tl",
+        "tvTypes": [
+            "NSFW"
+        ],
+        "iconUrl": "https://pinaycum.tv/favicon.ico",
+        "apiVersion": 1,
+        "fileHash": "sha256-c1f58a88657fd95032024dbe4236b624a04a5322519d97e378bdcd980b9ca35f"
+    },
+    {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/PrMovies.cs3",
+        "status": 1,
+        "version": 2,
+        "name": "PrMovies",
+        "internalName": "PrMovies",
+        "authors": [
+            "Digital"
+        ],
+        "description": "Movies and TV series from PRMovies",
+        "fileSize": 19649,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "hi",
+        "tvTypes": [
+            "Movie",
+            "TvSeries"
+        ],
+        "iconUrl": "https://prmovies.energy/wp-content/uploads/2026/08/cropped-images-1-3-8-1-1-1-1-1-1.png",
+        "apiVersion": 1,
+        "fileHash": "sha256-8083a48a9077da65c5ee702831cecddd7e93eb607b0b019071c1b0b60495bb0a"
+    },
+    {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/RiveStream.cs3",
+        "status": 1,
+        "version": 1,
+        "name": "RiveStream",
+        "internalName": "RiveStream",
+        "authors": [
+            "Digital"
+        ],
+        "description": "RiveStream movies and TV series",
+        "fileSize": 21836,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "en",
+        "tvTypes": [
+            "Movie",
+            "TvSeries"
+        ],
+        "iconUrl": "https://rivestream.ru/images/logo512.png",
+        "apiVersion": 1,
+        "fileHash": "sha256-d782c89195f49b15b89d9cea85434de8f21af801b16817932c1f08b8b9ae9904"
+    },
+    {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/SpankBang.cs3",
+        "status": 1,
+        "version": 1,
+        "name": "SpankBang",
+        "internalName": "SpankBang",
+        "authors": [
+            "Digital"
+        ],
+        "description": "SpankBang adult video catalog",
+        "fileSize": 10842,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "en",
+        "tvTypes": [
+            "NSFW"
+        ],
+        "iconUrl": "https://spankbang.com/favicon.ico",
+        "apiVersion": 1,
+        "fileHash": "sha256-f18f235fc30c99ff93ab8d5420e07e19a6a8e0d5a6dc31bd1a0d49960947f445"
+    },
+    {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/TheMoviesFlix.cs3",
+        "status": 1,
+        "version": 5,
+        "name": "TheMoviesFlix",
+        "internalName": "TheMoviesFlix",
+        "authors": [
+            "Digital"
+        ],
+        "description": "TheMoviesFlix Bollywood, Hollywood and Hindi dubbed movie catalog",
+        "fileSize": 18932,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "hi",
+        "tvTypes": [
+            "Movie",
+            "TvSeries"
+        ],
+        "iconUrl": "https://themoviesflix.actor/wp-content/uploads/2026/06/cropped-favicon-192x192.png",
+        "apiVersion": 1,
+        "fileHash": "sha256-096f48ab3ff91bc390644d6e3ef9cb228e93a7353d03677802b334be2039b3ff"
+    }
 ]
