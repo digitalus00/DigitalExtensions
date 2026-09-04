@@ -335,7 +335,7 @@
             "Digital"
         ],
         "description": "SkyMoviesHD movie catalog",
-        "fileSize": 12599,
+        "fileSize": 14234,
         "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
         "language": "hi",
         "tvTypes": [
@@ -344,7 +344,7 @@
         ],
         "iconUrl": "https://skymovieshd.meme/images/arw.gif",
         "apiVersion": 1,
-        "fileHash": "sha256-d26124209b3ea3b299bb6455b08a8c278f8103f673e66a861b74c0559740c773"
+        "fileHash": "sha256-e6ebaf1ffa9b1fe7d077f86f2c1a2379282ab4632456633c32cd33e8aba43d5c"
     },
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/SpankBang.cs3",
@@ -397,7 +397,7 @@
             "Digital"
         ],
         "description": "VegaMoviee movie and series catalog",
-        "fileSize": 13335,
+        "fileSize": 14785,
         "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
         "language": "hi",
         "tvTypes": [
@@ -406,6 +406,6 @@
         ],
         "iconUrl": "https://vegamoviee.com/wp-content/uploads/2025/10/favicon-2.png",
         "apiVersion": 1,
-        "fileHash": "sha256-e757746026b9b7c4a65c414dfd4263ec81665665b08e76a6c95b00fc1976863f"
+        "fileHash": "sha256-8fac3c2510c2e9f7b4552459ded15d01e2bbba2f1578415786b4b9003c109351"
     }
 ]
