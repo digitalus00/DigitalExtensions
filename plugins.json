@@ -2,7 +2,7 @@
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/Beeg.cs3",
         "status": 1,
-        "version": 1,
+        "version": 2,
         "name": "Beeg",
         "internalName": "Beeg",
         "authors": [
@@ -17,7 +17,7 @@
         ],
         "iconUrl": "https://beeg.com/favicon.ico",
         "apiVersion": 1,
-        "fileHash": "sha256-7ca206b57e999791c137c9831a7f8685d283260cfc6e3c80d6b51e73c3d73641"
+        "fileHash": "sha256-4f0f0b0cffcaee4a351da289048c9a60813d78227862c83067b990067e1cf921"
     },
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/CinemaHub.cs3",
@@ -328,7 +328,7 @@
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/SpankBang.cs3",
         "status": 1,
-        "version": 1,
+        "version": 2,
         "name": "SpankBang",
         "internalName": "SpankBang",
         "authors": [
@@ -343,7 +343,7 @@
         ],
         "iconUrl": "https://spankbang.com/favicon.ico",
         "apiVersion": 1,
-        "fileHash": "sha256-555e4deac83731e403f07d6d6b8c31a2c1b38c56f55484a3e3bd1d387c9b4878"
+        "fileHash": "sha256-450c28e29be8d538cc0b55aebf435d2728ab416aec22cc6c5e66ab90b854c06f"
     },
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/TheMoviesFlix.cs3",
@@ -369,14 +369,14 @@
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/VegaMoviee.cs3",
         "status": 1,
-        "version": 1,
+        "version": 2,
         "name": "VegaMoviee",
         "internalName": "VegaMoviee",
         "authors": [
             "Digital"
         ],
         "description": "VegaMoviee movie and series catalog",
-        "fileSize": 13329,
+        "fileSize": 13330,
         "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
         "language": "hi",
         "tvTypes": [
@@ -385,6 +385,6 @@
         ],
         "iconUrl": "https://vegamoviee.com/wp-content/uploads/2025/10/favicon-2.png",
         "apiVersion": 1,
-        "fileHash": "sha256-95be15fbc32992efd78c0c8a851f1b2dbdf03dee9389125115015481e448aed8"
+        "fileHash": "sha256-5f018dbc4676b80dcceb8eb96905295b42a1a92ca7890266f38d165402d989da"
     }
 ]
