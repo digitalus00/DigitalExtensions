@@ -1,4 +1,4 @@
-package com.digital.vegamoviee
+package com.digital.xprimehub
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.lagradost.cloudstream3.*
@@ -13,11 +13,11 @@ import org.jsoup.nodes.Element
 import java.net.URLEncoder
 import java.util.Base64
 
-class VegaMoviee : MainAPI() {
-    override var mainUrl = "https://new2.vegamovies.futbol"
-    override var name = "VegaMoviee"
+class XPrimeHub : MainAPI() {
+    override var mainUrl = "https://xprimehub.pics"
+    override var name = "XPrimeHub"
     override var lang = "hi"
-    override val supportedTypes = setOf(TvType.Movie, TvType.TvSeries)
+    override val supportedTypes = setOf(TvType.NSFW, TvType.Movie)
     override val hasMainPage = true
     override val hasQuickSearch = true
 
@@ -30,31 +30,31 @@ class VegaMoviee : MainAPI() {
 
     override val mainPage = mainPageOf(
         mainUrl to "Latest",
-        "$mainUrl/web-series/netflix/" to "Netflix",
-        "$mainUrl/web-series/amazon-prime-video/" to "Amazon Prime",
-        "$mainUrl/web-series/apple-tv/" to "Apple TV+",
-        "$mainUrl/anime-series/" to "Anime Series",
-        "$mainUrl/korean-series/" to "K-Drama",
-        "$mainUrl/movies-by-quality/2160p/" to "2160p 4K",
-        "$mainUrl/movies-by-quality/1080p/" to "1080p",
-        "$mainUrl/movies-by-quality/720p/" to "720p",
-        "$mainUrl/movies-by-quality/480p/" to "480p",
-        "$mainUrl/wwe-show/" to "WWE Shows",
-        "$mainUrl/adult/" to "Adult",
+        "$mainUrl/by-genres/brazzers/" to "Brazzers",
+        "$mainUrl/english/" to "English",
+        "$mainUrl/sexmex/" to "SexMex",
+        "$mainUrl/niksindian/" to "Niks Indian",
+        "$mainUrl/korean/" to "Korean",
+        "$mainUrl/russian/" to "Russian",
+        "$mainUrl/tagalog/" to "Tagalog",
+        "$mainUrl/onlyfans/" to "OnlyFans",
+        "$mainUrl/by-quality/1080p/" to "1080p",
+        "$mainUrl/by-quality/720p/" to "720p",
+        "$mainUrl/by-quality/480p/" to "480p",
     )
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
         val url = if (page <= 1) request.data else "${request.data.trimEnd('/')}/page/$page/"
         val doc = app.get(url, headers = headers, referer = mainUrl).document
         val items = parseGrid(doc)
-        val hasNext = doc.selectFirst("a.page-btn.next-btn, a.next.page-numbers, link[rel=next]") != null
+        val hasNext = doc.selectFirst("a.next.page-numbers, a.page-btn.next-btn, link[rel=next]") != null
         return newHomePageResponse(request.name, items, hasNext)
     }
 
     override suspend fun search(query: String, page: Int): SearchResponseList {
         val q = URLEncoder.encode(query.trim(), "UTF-8")
         val body = runCatching {
-            app.get("$mainUrl/ts-search.php?q=$q&page=$page", headers = headers, referer = mainUrl).text
+            app.get("$mainUrl/search.php?q=$q&page=$page", headers = headers, referer = mainUrl).text
         }.getOrNull() ?: return newSearchResponseList(emptyList(), false)
         val result = runCatching { parseJson<TsSearchResponse>(body) }.getOrNull()
             ?: return newSearchResponseList(emptyList(), false)
@@ -72,12 +72,13 @@ class VegaMoviee : MainAPI() {
 
     override suspend fun load(url: String): LoadResponse {
         val doc = app.get(url, headers = headers, referer = mainUrl).document
-        val title = doc.selectFirst("h1")?.text()?.trim()
+        val title = doc.selectFirst("h1.single-post-title, h1.entry-title, h1")?.text()?.trim()
             ?: doc.selectFirst("meta[property=og:title]")?.attr("content")?.trim()
             ?: throw ErrorLoadingException("Title not found")
         val poster = doc.selectFirst("meta[property=og:image]")?.attr("content")?.takeIf { it.isNotBlank() }
-            ?: doc.selectFirst("main.page-body img[src], .page-body img[src]")?.absUrl("src")
-        val plot = doc.selectFirst("meta[property=og:description], meta[name=description]")?.attr("content")?.trim()
+            ?: doc.selectFirst("img.wp-post-image[src]")?.absUrl("src")
+        val plot = doc.selectFirst("p.xp-plot-box")?.text()?.trim()
+            ?: doc.selectFirst("meta[property=og:description], meta[name=description]")?.attr("content")?.trim()
         val year = Regex("\\((\\d{4})\\)").find(title)?.groupValues?.get(1)?.toIntOrNull()
         val tags = doc.select(".category-tag, .meta-categories a, .pink-cat-badge")
             .map { it.text().trim() }
@@ -88,7 +89,7 @@ class VegaMoviee : MainAPI() {
         val isSeries = title.contains(Regex("(?i)series|season|episode")) && sections.any { it.links.isNotEmpty() }
 
         if (!isSeries) {
-            return newMovieLoadResponse(title, url, TvType.Movie, url) {
+            return newMovieLoadResponse(title, url, TvType.NSFW, url) {
                 posterUrl = poster
                 this.plot = plot
                 this.year = year
@@ -164,7 +165,7 @@ class VegaMoviee : MainAPI() {
             }
         }
         if (episodes.isEmpty()) {
-            return newMovieLoadResponse(title, url, TvType.Movie, url) {
+            return newMovieLoadResponse(title, url, TvType.NSFW, url) {
                 posterUrl = poster
                 this.plot = plot
                 this.year = year
@@ -310,7 +311,7 @@ class VegaMoviee : MainAPI() {
                 }
                 else -> {
                     val promo = text.contains(Regex("(?i)telegram|join|group|official")) ||
-                        href.contains(Regex("(?i)vglist|vegamovies-apk|gokuhd|rogmovies|xprimehub"))
+                        href.contains(Regex("(?i)vglist|vegamovies-apk|gokuhd|rogmovies|xprimehub|vegamovies\\.futbol"))
                     if (!promo && runCatching {
                             loadExtractor(href, nexdriveUrl, subtitleCallback, callback)
                         }.getOrDefault(false)
@@ -363,7 +364,7 @@ class VegaMoviee : MainAPI() {
     // Collects quality sections: a heading followed by one or more nexdrive
     // mirror links (G-Direct / V-Cloud / Batch/Zip / V-Drive).
     private fun collectSections(doc: Document): List<Section> {
-        val container = doc.selectFirst("main.page-body, .entry-content, article") ?: doc
+        val container = doc.selectFirst("article.single-entry-body, main.page-body, .entry-content, article") ?: doc
         val sections = mutableListOf<Section>()
         var current: Section? = null
         for (el in container.select("h2, h3, h4, h5, h6, a[href]")) {
@@ -387,9 +388,10 @@ class VegaMoviee : MainAPI() {
     }
 
     private fun parseGrid(doc: Document): List<SearchResponse> {
-        val cards = doc.select(".movies-grid a[href], .vm3-main-grid a[href]").mapNotNull { it.toCardResult() }
-        if (cards.isNotEmpty()) return cards.distinctBy { it.url }
-        return doc.select("article").mapNotNull { it.toArticleResult() }.distinctBy { it.url }
+        val articles = doc.select("article").mapNotNull { it.toArticleResult() }
+        if (articles.isNotEmpty()) return articles.distinctBy { it.url }
+        return doc.select(".movies-grid a[href], .vm3-main-grid a[href]").mapNotNull { it.toCardResult() }
+            .distinctBy { it.url }
     }
 
     private fun Element.toCardResult(): SearchResponse? {
@@ -416,14 +418,14 @@ class VegaMoviee : MainAPI() {
         return if (clean.contains(Regex("(?i)series|season|episode"))) {
             newTvSeriesSearchResponse(clean, url, TvType.TvSeries) { posterUrl = poster }
         } else {
-            newMovieSearchResponse(clean, url, TvType.Movie) { posterUrl = poster }
+            newMovieSearchResponse(clean, url, TvType.NSFW) { posterUrl = poster }
         }
     }
 
     private fun cleanTitle(raw: String): String = raw.trim()
         .removePrefix("Download*")
         .removePrefix("Download")
-        .replace(Regex("(?i)\\s*[|–-]\\s*VegaMovies(\\.is|\\.tw)?\\s*$"), "")
+        .replace(Regex("(?i)\\s*[|–-]\\s*(XPrimeHub|VegaMovies)(\\.pics|\\.is|\\.tw)?\\s*$"), "")
         .trim()
 
     private fun cleanMirrorLabel(label: String): String =

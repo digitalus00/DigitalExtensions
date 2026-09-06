@@ -1,4 +1,4 @@
-package com.digital.vegamoviee
+package com.digital.rogmovies
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.lagradost.cloudstream3.*
@@ -13,9 +13,9 @@ import org.jsoup.nodes.Element
 import java.net.URLEncoder
 import java.util.Base64
 
-class VegaMoviee : MainAPI() {
-    override var mainUrl = "https://new2.vegamovies.futbol"
-    override var name = "VegaMoviee"
+class RogMovies : MainAPI() {
+    override var mainUrl = "https://new2.rogmovies.click"
+    override var name = "RogMovies"
     override var lang = "hi"
     override val supportedTypes = setOf(TvType.Movie, TvType.TvSeries)
     override val hasMainPage = true
@@ -30,17 +30,17 @@ class VegaMoviee : MainAPI() {
 
     override val mainPage = mainPageOf(
         mainUrl to "Latest",
+        "$mainUrl/bollywood/" to "Bollywood",
+        "$mainUrl/hindi-dubbed-movies/" to "South Hindi Dubbed",
         "$mainUrl/web-series/netflix/" to "Netflix",
         "$mainUrl/web-series/amazon-prime-video/" to "Amazon Prime",
-        "$mainUrl/web-series/apple-tv/" to "Apple TV+",
-        "$mainUrl/anime-series/" to "Anime Series",
-        "$mainUrl/korean-series/" to "K-Drama",
-        "$mainUrl/movies-by-quality/2160p/" to "2160p 4K",
-        "$mainUrl/movies-by-quality/1080p/" to "1080p",
-        "$mainUrl/movies-by-quality/720p/" to "720p",
-        "$mainUrl/movies-by-quality/480p/" to "480p",
-        "$mainUrl/wwe-show/" to "WWE Shows",
-        "$mainUrl/adult/" to "Adult",
+        "$mainUrl/web-series/sonyliv/" to "SonyLIV",
+        "$mainUrl/web-series/zee5-originals/" to "ZEE5",
+        "$mainUrl/tamil/" to "Tamil",
+        "$mainUrl/telugu/" to "Telugu",
+        "$mainUrl/movies-by-genres/action/" to "Action",
+        "$mainUrl/movies-by-genres/thriller/" to "Thriller",
+        "$mainUrl/movies-by-genres/horror/" to "Horror",
     )
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
@@ -423,7 +423,7 @@ class VegaMoviee : MainAPI() {
     private fun cleanTitle(raw: String): String = raw.trim()
         .removePrefix("Download*")
         .removePrefix("Download")
-        .replace(Regex("(?i)\\s*[|–-]\\s*VegaMovies(\\.is|\\.tw)?\\s*$"), "")
+        .replace(Regex("(?i)\\s*[|–-]\\s*(RogMovies|VegaMovies)(\\.is|\\.tw|\\.click)?\\s*$"), "")
         .trim()
 
     private fun cleanMirrorLabel(label: String): String =

@@ -326,25 +326,25 @@
         "fileHash": "sha256-d782c89195f49b15b89d9cea85434de8f21af801b16817932c1f08b8b9ae9904"
     },
     {
-        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/SkyMoviesHD.cs3",
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/RogMovies.cs3",
         "status": 1,
-        "version": 1,
-        "name": "SkyMoviesHD",
-        "internalName": "SkyMoviesHD",
+        "version": 2,
+        "name": "RogMovies",
+        "internalName": "RogMovies",
         "authors": [
             "Digital"
         ],
-        "description": "SkyMoviesHD movie catalog",
-        "fileSize": 14234,
+        "description": "RogMovies movie catalog",
+        "fileSize": 37713,
         "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
         "language": "hi",
         "tvTypes": [
             "Movie",
             "TvSeries"
         ],
-        "iconUrl": "https://skymovieshd.meme/images/arw.gif",
+        "iconUrl": "https://new2.rogmovies.click/images/favicon-32x32.png",
         "apiVersion": 1,
-        "fileHash": "sha256-e6ebaf1ffa9b1fe7d077f86f2c1a2379282ab4632456633c32cd33e8aba43d5c"
+        "fileHash": "sha256-47a905e20f42653cd05ec0cb7f0859b2411f2cccf7b17716737fa30a060b0347"
     },
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/SpankBang.cs3",
@@ -390,22 +390,43 @@
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/VegaMoviee.cs3",
         "status": 1,
-        "version": 2,
+        "version": 4,
         "name": "VegaMoviee",
         "internalName": "VegaMoviee",
         "authors": [
             "Digital"
         ],
         "description": "VegaMoviee movie and series catalog",
-        "fileSize": 14785,
+        "fileSize": 37675,
         "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
         "language": "hi",
         "tvTypes": [
             "Movie",
             "TvSeries"
         ],
-        "iconUrl": "https://vegamoviee.com/wp-content/uploads/2025/10/favicon-2.png",
+        "iconUrl": "https://new2.vegamovies.futbol/images/favicon-32x32.png",
         "apiVersion": 1,
-        "fileHash": "sha256-8fac3c2510c2e9f7b4552459ded15d01e2bbba2f1578415786b4b9003c109351"
+        "fileHash": "sha256-a77ee6f63b171340087d52f3c488a2d0d0f957e6fff5543ed4ededb29189307c"
+    },
+    {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/XPrimeHub.cs3",
+        "status": 1,
+        "version": 2,
+        "name": "XPrimeHub",
+        "internalName": "XPrimeHub",
+        "authors": [
+            "Digital"
+        ],
+        "description": "XPrimeHub adult video catalog",
+        "fileSize": 37770,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "hi",
+        "tvTypes": [
+            "NSFW",
+            "Movie"
+        ],
+        "iconUrl": "https://xprimehub.pics/wp-content/uploads/2026/04/cropped-icon-192x192.png",
+        "apiVersion": 1,
+        "fileHash": "sha256-74c0e7293c4ac83a2cafab0c755cfd5bab123768c20db00d80b69438fbe8ef64"
     }
 ]
