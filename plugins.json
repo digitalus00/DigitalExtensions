@@ -1,5 +1,25 @@
 [
     {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/Aagmaal.cs3",
+        "status": 1,
+        "version": 1,
+        "name": "Aagmaal",
+        "internalName": "Aagmaal",
+        "authors": [
+            "Digital"
+        ],
+        "description": "Aagmaal Hindi hot web series and uncut short films",
+        "fileSize": 17989,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "hi",
+        "tvTypes": [
+            "NSFW"
+        ],
+        "iconUrl": "https://aagmaal.com/favicon.ico",
+        "apiVersion": 1,
+        "fileHash": "sha256-e684cef1715672bea1fd9f2ca6c9d72047d8436ebbf22cf74e10b1f1371b1578"
+    },
+    {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/Beeg.cs3",
         "status": 1,
         "version": 2,
@@ -60,6 +80,26 @@
         "iconUrl": "https://cinevood.bingo/wp-content/uploads/2020/07/favicon2.png",
         "apiVersion": 1,
         "fileHash": "sha256-21cad4b543789c51a6074da274c3d2d293234c677c657a73958eb548e6e93af6"
+    },
+    {
+        "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/DesiHub.cs3",
+        "status": 1,
+        "version": 1,
+        "name": "DesiHub",
+        "internalName": "DesiHub",
+        "authors": [
+            "Digital"
+        ],
+        "description": "DesiHub desi leaks, live shows and exclusive videos",
+        "fileSize": 16606,
+        "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
+        "language": "hi",
+        "tvTypes": [
+            "NSFW"
+        ],
+        "iconUrl": "https://desihub.sh/favicon.ico",
+        "apiVersion": 1,
+        "fileHash": "sha256-5d0f33f9255aa8e7461cf011355030302534601437164ae483c4958846fe345a"
     },
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/DesiKahaniya.cs3",
