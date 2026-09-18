@@ -2,14 +2,14 @@
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/Aagmaal.cs3",
         "status": 1,
-        "version": 1,
+        "version": 2,
         "name": "Aagmaal",
         "internalName": "Aagmaal",
         "authors": [
             "Digital"
         ],
         "description": "Aagmaal Hindi hot web series and uncut short films",
-        "fileSize": 17989,
+        "fileSize": 20436,
         "repositoryUrl": "https://github.com/digitalus00/DigitalExtensions",
         "language": "hi",
         "tvTypes": [
@@ -17,7 +17,7 @@
         ],
         "iconUrl": "https://aagmaal.com/favicon.ico",
         "apiVersion": 1,
-        "fileHash": "sha256-e684cef1715672bea1fd9f2ca6c9d72047d8436ebbf22cf74e10b1f1371b1578"
+        "fileHash": "sha256-1f0fc0caa36590df479d2ecf6198690b27f96eea679798acf28182dd1fa889d4"
     },
     {
         "url": "https://raw.githubusercontent.com/digitalus00/DigitalExtensions/builds/Beeg.cs3",
