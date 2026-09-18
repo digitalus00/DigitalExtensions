@@ -3,6 +3,7 @@ package com.digital.aagmaal
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.network.CloudflareKiller
 import com.lagradost.cloudstream3.utils.*
+import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.net.URI
@@ -85,18 +86,20 @@ class Aagmaal : MainAPI() {
         callback: (ExtractorLink) -> Unit
     ): Boolean {
         val response = app.get(data, headers = headers, referer = "$mainUrl/", interceptor = cloudflareKiller)
-        val doc = response.document
-        val raw = (response.text + " " + doc.html()).decodeEscapedUrl()
-        val entry = doc.selectFirst(".entry, .entry-content, .post-content, .post-listing, article") ?: doc
+        val html = response.text
+        if (response.code == 403 || html.contains("Just a moment", true)) {
+            throw ErrorLoadingException("Aagmaal requested Cloudflare verification. Open the site once in WebView and retry.")
+        }
+        val doc = Jsoup.parse(html, data)
+        val raw = html.decodeEscapedUrl()
         val links = linkedSetOf<String>()
-        entry.select("iframe[src], video[src], video source[src], a[href]").forEach { element ->
-            val attribute = if (element.tagName() == "a") "href" else "src"
-            element.attr(attribute).toAbsoluteUrl(data)?.let(links::add)
-            listOf("data-src", "data-url", "data-video", "data-embed").forEach { key ->
+        doc.select("iframe, embed, video, source, a[href], [data-embed], [data-video]").forEach { element ->
+            listOf("src", "href", "data-src", "data-lazy-src", "data-url", "data-video", "data-embed").forEach { key ->
                 element.attr(key).toAbsoluteUrl(data)?.let(links::add)
             }
         }
-        directMediaUrls(raw).forEach(links::add)
+        directMediaUrls(raw, data).forEach(links::add)
+        embeddedUrls(raw, data).forEach(links::add)
 
         val promo = Regex("(?i)aagmaal|aagvdo|t\\.me|telegram|ibb\\.co|dmca|contact|comment|twitter|facebook|whatsapp|instagram")
         var found = false
@@ -114,6 +117,7 @@ class Aagmaal : MainAPI() {
                 isLuluUrl(link) -> {
                     val embed = link.toEmbedUrl()
                     if (resolveLuluStream(embed, callback)) found = true
+                    else if (loadExtractor(embed, data, subtitleCallback, callback)) found = true
                 }
                 promo.containsMatchIn(link) -> {}
                 else -> if (runCatching { loadExtractor(link, data, subtitleCallback, callback) }.getOrDefault(false)) found = true
@@ -130,7 +134,7 @@ class Aagmaal : MainAPI() {
         }.getOrNull()
             ?: return false
         val decoded = html.decodeEscapedUrl()
-        val streamUrl = directMediaUrls(decoded).firstOrNull()
+        val streamUrl = directMediaUrls(decoded, embedUrl).firstOrNull()
             ?: unpackSources(decoded)
             ?: return false
         val normalized = streamUrl.toAbsoluteUrl(embedUrl) ?: return false
@@ -147,7 +151,7 @@ class Aagmaal : MainAPI() {
         val packed = Regex("eval\\(function\\(p,a,c,k,e,[rd]\\).*?</script>", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
             .find(html)?.value?.substringBefore("</script>") ?: return null
         val unpacked = runCatching { JsUnpacker(packed).unpack() }.getOrNull() ?: return null
-        return directMediaUrls(unpacked.replace("\\/", "/")).firstOrNull()
+        return directMediaUrls(unpacked.replace("\\/", "/"), "https://cdn1.site/").firstOrNull()
     }
 
     private suspend fun getDocument(url: String): Document {
@@ -161,14 +165,15 @@ class Aagmaal : MainAPI() {
     // The site has used several WordPress themes. Find permalink cards by their
     // structure instead of relying on one theme's post-box-title class.
     private fun parseCards(doc: Document): List<SearchResponse> {
-        val cards = doc.select("article, .post, .post-box, .item, .blog-post, .td_module_wrap, .blog-entry")
-        val anchors = if (cards.isNotEmpty()) cards.flatMap { card ->
-            card.select("h1 a[href], h2 a[href], h3 a[href], h4 a[href], a.post-title[href], a.entry-title[href], a[title][href]").take(1)
-        } else doc.select("h1 a[href], h2 a[href], h3 a[href], h4 a[href]")
+        val anchors = doc.select(
+            "h1 a[href], h2 a[href], h3 a[href], h4 a[href], " +
+                "a.post-title[href], a.entry-title[href], article a[href], .post a[href], .item a[href]",
+        )
         return anchors.mapNotNull { anchor ->
-                val url = anchor.attr("href").toAbsoluteUrl(doc.baseUri()) ?: return@mapNotNull null
+                val url = anchor.absUrl("href").ifBlank { anchor.attr("href") }
+                    .toAbsoluteUrl(doc.baseUri()) ?: return@mapNotNull null
                 if (!url.startsWith(mainUrl) || isNavigationUrl(url)) return@mapNotNull null
-                val title = cleanTitle(anchor.attr("title").ifBlank { anchor.text() }).takeIf(String::isNotBlank)
+                val title = cleanTitle(findCardTitle(anchor)).takeIf(String::isNotBlank)
                     ?: return@mapNotNull null
                 newMovieSearchResponse(title, url, TvType.NSFW) { posterUrl = findPoster(anchor) }
             }
@@ -190,6 +195,25 @@ class Aagmaal : MainAPI() {
         return null
     }
 
+    private fun findCardTitle(anchor: Element): String {
+        val direct = listOf("title", "aria-label").firstNotNullOfOrNull { key ->
+            anchor.attr(key).trim().takeIf(String::isNotBlank)
+        } ?: anchor.text().trim().takeIf(String::isNotBlank)
+        if (direct != null) return direct
+
+        var block: Element? = anchor.parent()
+        repeat(4) {
+            val current = block ?: return ""
+            val heading = current.selectFirst("h1, h2, h3, h4, .title, .post-title, .entry-title")
+                ?.text()?.trim()?.takeIf(String::isNotBlank)
+            if (heading != null) return heading
+            val alt = current.selectFirst("img[alt]")?.attr("alt")?.trim()?.takeIf(String::isNotBlank)
+            if (alt != null) return alt
+            block = current.parent()
+        }
+        return ""
+    }
+
     private fun findImage(element: Element): String? = element.selectFirst("img")?.let { image ->
         listOf("data-src", "data-lazy-src", "data-original", "src").firstNotNullOfOrNull { key ->
             image.attr(key).toAbsoluteUrl(image.baseUri())
@@ -201,9 +225,13 @@ class Aagmaal : MainAPI() {
 
     private fun isLuluUrl(url: String) = url.contains(Regex("(?i)(?:cdn1\\.site|lulu(?:stream|vid)?\\.)"))
 
+    private fun isKnownEmbedUrl(url: String) = url.contains(
+        Regex("(?i)(?:cdn1\\.site|lulu(?:stream|vid)?\\.|strcloud\\.|stmix\\.|strmup\\.|streamtape\\.|dood(?:stream)?\\.)"),
+    )
+
     private fun String.toEmbedUrl() = replace(Regex("/(?:(?:d|f|download))/"), "/e/")
 
-    private fun String.toAbsoluteUrl(base: String): String? = trim().trim('"', '\'', '`')
+    private fun String.toAbsoluteUrl(base: String): String? = trim().trim('"', '\'', '`', ')', ']', ';', ',')
         .takeIf { it.isNotBlank() && !it.startsWith("javascript:") && !it.startsWith("#") }
         ?.let { value ->
             when {
@@ -214,11 +242,20 @@ class Aagmaal : MainAPI() {
         }
         ?.takeIf { it.startsWith("http") }
 
-    private fun directMediaUrls(raw: String): List<String> = Regex(
+    private fun directMediaUrls(raw: String, base: String): List<String> = Regex(
         "(?:https?:)?//[^\\s\\\"'<>\\\\]+?\\.(?:m3u8|mp4)(?:\\?[^\\s\\\"'<>\\\\]*)?",
         RegexOption.IGNORE_CASE
     ).findAll(raw)
-        .mapNotNull { it.value.toAbsoluteUrl(mainUrl) }
+        .mapNotNull { it.value.toAbsoluteUrl(base) }
+        .distinct()
+        .toList()
+
+    private fun embeddedUrls(raw: String, base: String): List<String> = Regex(
+        "(?:https?:)?//[^\\s\\\"'<>\\\\]+",
+        RegexOption.IGNORE_CASE,
+    ).findAll(raw)
+        .mapNotNull { it.value.toAbsoluteUrl(base) }
+        .filter(::isKnownEmbedUrl)
         .distinct()
         .toList()
 
@@ -227,6 +264,7 @@ class Aagmaal : MainAPI() {
     private fun isM3u8(url: String) = url.contains(".m3u8", true)
 
     private fun String.decodeEscapedUrl() = replace("\\/", "/")
+        .replace("\\u002F", "/")
         .replace("\\u0026", "&")
         .replace("&amp;", "&")
 
